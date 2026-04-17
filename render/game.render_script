@@ -33,13 +33,14 @@ function update(self)
 
 	local cx = self.camera_pos.x
 	local cy = self.camera_pos.y
+	local zoom = 0.5  -- <1 = zoomed out, shows more of the world
 	render.set_view(vmath.matrix4_look_at(
 		vmath.vector3(cx, cy, 1),
 		vmath.vector3(cx, cy, 0),
 		vmath.vector3(0, 1, 0)))
 	render.set_projection(vmath.matrix4_orthographic(
-		-display_w / 2, display_w / 2,
-		-display_h / 2, display_h / 2,
+		-display_w / (2 * zoom), display_w / (2 * zoom),
+		-display_h / (2 * zoom), display_h / (2 * zoom),
 		-1, 1))
 
 	render.draw(self.tile_pred)

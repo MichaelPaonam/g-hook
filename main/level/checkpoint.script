@@ -5,6 +5,8 @@ function init(self)
 	self.hit = false
 	if not self.is_finish then
 		msg.post("/level#level_script", "register_checkpoint", { id = self.checkpoint_id })
+	else
+		msg.post("/level#level_script", "register_finish", { url = msg.url() })
 	end
 end
 

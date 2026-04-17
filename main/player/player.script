@@ -1,16 +1,17 @@
 local stw = require "main.util.screen_to_world"
 
-local PULL_FORCE = 6000        -- force pulling toward anchor(s)
-local FREE_MOVE_FORCE = 2000
+local PULL_FORCE = 500         -- force pulling toward anchor(s)
+local FREE_MOVE_FORCE = 90     -- gentle steering force, not instant stop/start
 local MAX_SPEED = 900
-local DAMPING_FREE = 0.4
+local DAMPING_FREE = 0.6       -- higher: walking feels controlled
 local DAMPING_HOOKED = 0.02    -- very low: Fanny glides while hooked
-local DAMPING_LAUNCH = 0.0
-local LAUNCH_DURATION = 0.3
+local DAMPING_LAUNCH = 0.25    -- gradual decel after cable release
+local LAUNCH_DURATION = 1.5    -- longer coast window after releasing cable
 local MAX_CABLES = 3
 local CHAIN_WINDOW = 3.0       -- generous window for chaining
 local CHAIN_BONUS = 0.20       -- 20% per chain level
-local HOOK_MAX_RANGE = 700
+local HOOK_MAX_RANGE = 1200
+local AUTO_RELEASE_DIST = 120  -- release cable when player reaches this close to anchor
 
 local STATE_FREE = 1
 local STATE_HOOKED = 2
@@ -20,6 +21,8 @@ function init(self)
 	msg.post(".", "acquire_input_focus")
 	self.input = vmath.vector3()
 	self.mouse_screen = vmath.vector3()
+	self.panning = false
+	self.last_pan_pos = vmath.vector3()
 	self.state = STATE_FREE
 	self.cables = {}
 	self.cable_counter = 0
@@ -30,9 +33,36 @@ function init(self)
 	self.elapsed_time = 0
 	self.checkpoints_hit = 0
 	self.total_checkpoints = 0
+	self.reset_timer = 0
+end
+
+local function restart(self)
+	self.cables = {}
+	self.chain_count = 0
+	self.timer_running = false
+	self.elapsed_time = 0
+	self.last_release_time = 0
+	self.reset_timer = 0
+	self.state = STATE_FREE
+	self.checkpoints_hit = 0
+	go.set("#collisionobject", "linear_damping", DAMPING_FREE)
+	go.set("#collisionobject", "linear_velocity", vmath.vector3())
+	go.set_position(vmath.vector3(150, 300, 0))
+	msg.post("/hud#hud", "update_timer", { time = 0 })
+	msg.post("/hud#hud", "reset")
+	msg.post("/level#level_script", "reset_checkpoints")
 end
 
 function update(self, dt)
+	-- delayed reset after wrong checkpoint
+	if self.reset_timer > 0 then
+		self.reset_timer = self.reset_timer - dt
+		if self.reset_timer <= 0 then
+			restart(self)
+		end
+		return
+	end
+
 	if self.timer_running then
 		self.elapsed_time = self.elapsed_time + dt
 		msg.post("/hud#hud", "update_timer", { time = self.elapsed_time })
@@ -87,6 +117,32 @@ function update(self, dt)
 			constrain_to_rope(cable, vel)
 		end
 
+		-- auto-release: release when player passes through or flies past anchor
+		local player_pos2 = go.get_position()
+		local vel2 = go.get("#collisionobject", "linear_velocity")
+		local remaining = {}
+		for _, cable in ipairs(self.cables) do
+			local to_anchor = cable.anchor_pos - player_pos2
+			local dist = vmath.length(to_anchor)
+			-- release if close enough to anchor
+			local reached = dist < AUTO_RELEASE_DIST
+			-- also release if moving away from anchor AND was previously close (passed through)
+			local moving_away = dist > 0.1 and vmath.dot(vel2, vmath.normalize(to_anchor)) < 0
+			local passed_through = reached or (moving_away and dist < AUTO_RELEASE_DIST * 2.5)
+			if not passed_through then
+				table.insert(remaining, cable)
+			end
+		end
+		if #remaining < #self.cables then
+			self.cables = remaining
+			self.last_release_time = socket.gettime()
+			if #self.cables == 0 then
+				self.state = STATE_LAUNCHING
+				self.launch_timer = LAUNCH_DURATION
+				go.set("#collisionobject", "linear_damping", DAMPING_LAUNCH)
+			end
+		end
+
 	elseif self.state == STATE_FREE then
 		local input_len = vmath.length(self.input)
 		if input_len > 0.01 then
@@ -130,11 +186,15 @@ function constrain_to_rope(cable, vel)
 
 	if dist > cable.rope_length then
 		local radial = vmath.normalize(to_anchor)
+		-- snap position back to rope boundary
 		local new_pos = cable.anchor_pos - radial * cable.rope_length
 		go.set_position(new_pos)
 
+		-- radial_vel > 0 means moving toward anchor (inward, fine)
+		-- radial_vel < 0 means moving away from anchor (outward, causes bounce — kill it)
 		local radial_vel = vmath.dot(vel, radial)
 		if radial_vel < 0 then
+			-- remove the outward component entirely, keep only tangential velocity
 			vel = vel - radial * radial_vel
 			go.set("#collisionobject", "linear_velocity", vel)
 		end
@@ -159,6 +219,7 @@ local function fire_hook(self)
 	if not self.timer_running then
 		self.timer_running = true
 		self.elapsed_time = 0
+		msg.post("/level#level_script", "timer_start")
 	end
 
 	local now = socket.gettime()
@@ -169,10 +230,19 @@ local function fire_hook(self)
 	end
 
 	if #self.cables >= MAX_CABLES then
+		-- drop oldest cable cleanly so it doesn't linger and cause swing-back
 		table.remove(self.cables, 1)
+		self.last_release_time = socket.gettime()
 	end
 
-	local anchor_pos = vmath.vector3(result.position.x, result.position.y, 0)
+	-- use the anchor object's center for anchor group hits, hit point for walls
+	local anchor_pos
+	if result.group == hash("anchor") then
+		anchor_pos = vmath.vector3(go.get_world_position(result.id))
+		anchor_pos.z = 0
+	else
+		anchor_pos = vmath.vector3(result.position.x, result.position.y, 0)
+	end
 	local rope_length = vmath.length(anchor_pos - player_pos)
 
 	local cable = {
@@ -196,23 +266,8 @@ local function release_all(self)
 	go.set("#collisionobject", "linear_damping", DAMPING_LAUNCH)
 end
 
-local function restart(self)
-	self.cables = {}
-	self.chain_count = 0
-	self.timer_running = false
-	self.elapsed_time = 0
-	self.last_release_time = 0
-	self.state = STATE_FREE
-	self.checkpoints_hit = 0
-	go.set("#collisionobject", "linear_damping", DAMPING_FREE)
-	go.set("#collisionobject", "linear_velocity", vmath.vector3())
-	go.set_position(vmath.vector3(480, 320, 0))
-	msg.post("/hud#hud", "update_timer", { time = 0 })
-	msg.post("/hud#hud", "reset")
-	msg.post("/level#level_script", "reset_checkpoints")
-end
-
 function on_input(self, action_id, action)
+	if self.reset_timer > 0 then return end  -- block all input during reset countdown
 	if action_id == hash("move_up") then
 		if action.pressed then self.input.y = 1
 		elseif action.released then self.input.y = 0 end
@@ -233,6 +288,16 @@ function on_input(self, action_id, action)
 		if action.pressed then
 			release_all(self)
 		end
+	elseif action_id == hash("pan_camera") then
+		if action.pressed then
+			self.panning = true
+			self.last_pan_pos.x = action.x
+			self.last_pan_pos.y = action.y
+			msg.post("/camera#camera_script", "pan_start")
+		elseif action.released then
+			self.panning = false
+			msg.post("/camera#camera_script", "pan_end")
+		end
 	elseif action_id == hash("restart") then
 		if action.pressed then
 			restart(self)
@@ -242,6 +307,17 @@ function on_input(self, action_id, action)
 	if not action_id then
 		self.mouse_screen.x = action.x
 		self.mouse_screen.y = action.y
+		-- pan: drag in opposite direction to move camera
+		if self.panning then
+			local dx = action.x - self.last_pan_pos.x
+			local dy = action.y - self.last_pan_pos.y
+			local zoom = 0.5
+			msg.post("/camera#camera_script", "pan_delta", {
+				delta = vmath.vector3(-dx / zoom, -dy / zoom, 0)
+			})
+			self.last_pan_pos.x = action.x
+			self.last_pan_pos.y = action.y
+		end
 	end
 end
 
@@ -255,6 +331,9 @@ function on_message(self, message_id, message, sender)
 			local final_time = self.elapsed_time
 			msg.post("/hud#hud", "finish", { time = final_time })
 		end
+	elseif message_id == hash("wrong_checkpoint") then
+		msg.post("/hud#hud", "show_message", { text = "WRONG ORDER! RESETTING..." })
+		self.reset_timer = 1.5
 	elseif message_id == hash("contact_point_response") then
 		-- wall collision handled by physics engine
 	end
