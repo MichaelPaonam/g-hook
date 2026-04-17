@@ -1,16 +1,16 @@
 local stw = require "main.util.screen_to_world"
 
-local SWING_FORCE = 5000
+local PULL_FORCE = 6000        -- force pulling toward anchor(s)
 local FREE_MOVE_FORCE = 2000
-local MAX_SPEED = 800
+local MAX_SPEED = 900
 local DAMPING_FREE = 0.4
-local DAMPING_HOOKED = 0.05
+local DAMPING_HOOKED = 0.02    -- very low: Fanny glides while hooked
 local DAMPING_LAUNCH = 0.0
-local LAUNCH_DURATION = 0.5
+local LAUNCH_DURATION = 0.3
 local MAX_CABLES = 3
-local CHAIN_WINDOW = 1.5
-local CHAIN_BONUS = 0.15
-local HOOK_MAX_RANGE = 600
+local CHAIN_WINDOW = 3.0       -- generous window for chaining
+local CHAIN_BONUS = 0.20       -- 20% per chain level
+local HOOK_MAX_RANGE = 700
 
 local STATE_FREE = 1
 local STATE_HOOKED = 2
@@ -30,7 +30,6 @@ function init(self)
 	self.elapsed_time = 0
 	self.checkpoints_hit = 0
 	self.total_checkpoints = 0
-	self.use_manual_constraint = true
 end
 
 function update(self, dt)
@@ -52,31 +51,40 @@ function update(self, dt)
 
 	if self.state == STATE_HOOKED and #self.cables > 0 then
 		local player_pos = go.get_position()
-		local primary = self.cables[#self.cables]
-		local to_anchor = primary.anchor_pos - player_pos
-		local dist = vmath.length(to_anchor)
+		local n = #self.cables
 
-		if dist > 0.01 then
-			local radial = vmath.normalize(to_anchor)
-			local tangent = vmath.vector3(-radial.y, radial.x, 0)
-			local input_len = vmath.length(self.input)
-
-			if input_len > 0.01 then
-				local tangent_input = vmath.dot(self.input, tangent)
-				local momentum_mult = 1.0 + (self.chain_count * CHAIN_BONUS)
-				local force = tangent * tangent_input * SWING_FORCE * momentum_mult
-
-				msg.post("#collisionobject", "apply_force", {
-					force = force,
-					position = go.get_world_position()
-				})
-			end
+		-- Fanny pull direction:
+		-- 1 cable  → toward that anchor
+		-- 2 cables → bisector of both
+		-- 3 cables → bisector of last two (cables[2] and cables[3])
+		local pull_dir
+		if n == 1 then
+			pull_dir = vmath.normalize(self.cables[1].anchor_pos - player_pos)
+		elseif n == 2 then
+			local d1 = vmath.normalize(self.cables[1].anchor_pos - player_pos)
+			local d2 = vmath.normalize(self.cables[2].anchor_pos - player_pos)
+			local sum = d1 + d2
+			if vmath.length(sum) < 0.01 then sum = d2 end
+			pull_dir = vmath.normalize(sum)
+		else
+			local d2 = vmath.normalize(self.cables[n-1].anchor_pos - player_pos)
+			local d3 = vmath.normalize(self.cables[n].anchor_pos - player_pos)
+			local sum = d2 + d3
+			if vmath.length(sum) < 0.01 then sum = d3 end
+			pull_dir = vmath.normalize(sum)
 		end
 
-		if self.use_manual_constraint then
-			for _, cable in ipairs(self.cables) do
-				constrain_to_rope(cable, vel)
-			end
+		local momentum_mult = 1.0 + (self.chain_count * CHAIN_BONUS)
+		local force = pull_dir * PULL_FORCE * momentum_mult
+		msg.post("#collisionobject", "apply_force", {
+			force = force,
+			position = go.get_world_position()
+		})
+
+		-- rope constraint: don't let player go past any anchor's rope length
+		local vel = go.get("#collisionobject", "linear_velocity")
+		for _, cable in ipairs(self.cables) do
+			constrain_to_rope(cable, vel)
 		end
 
 	elseif self.state == STATE_FREE then
