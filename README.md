@@ -2,7 +2,7 @@
 
 A 2D top-down grappling hook time-trial game built with [Defold](https://defold.com) for HTML5 browsers.
 
-Fire cables at anchor points, swing around them using momentum, chain hooks for speed boosts, and race through checkpoints as fast as possible. Inspired by Fanny's cable mechanics from Mobile Legends: Bang Bang.
+Fire cables at anchor points, swing around them using momentum, chain hooks for speed boosts, and race through checkpoints as fast as possible.
 
 ## Controls
 
