@@ -1,0 +1,253 @@
+local stw = require "main.util.screen_to_world"
+
+local SWING_FORCE = 5000
+local FREE_MOVE_FORCE = 2000
+local MAX_SPEED = 800
+local DAMPING_FREE = 0.4
+local DAMPING_HOOKED = 0.05
+local DAMPING_LAUNCH = 0.0
+local LAUNCH_DURATION = 0.5
+local MAX_CABLES = 3
+local CHAIN_WINDOW = 1.5
+local CHAIN_BONUS = 0.15
+local HOOK_MAX_RANGE = 600
+
+local STATE_FREE = 1
+local STATE_HOOKED = 2
+local STATE_LAUNCHING = 3
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.input = vmath.vector3()
+	self.mouse_screen = vmath.vector3()
+	self.state = STATE_FREE
+	self.cables = {}
+	self.cable_counter = 0
+	self.chain_count = 0
+	self.last_release_time = 0
+	self.launch_timer = 0
+	self.timer_running = false
+	self.elapsed_time = 0
+	self.checkpoints_hit = 0
+	self.total_checkpoints = 0
+	self.use_manual_constraint = true
+end
+
+function update(self, dt)
+	if self.timer_running then
+		self.elapsed_time = self.elapsed_time + dt
+		msg.post("/hud#hud", "update_timer", { time = self.elapsed_time })
+	end
+
+	local vel = go.get("#collisionobject", "linear_velocity")
+	local speed = vmath.length(vel)
+
+	if self.state == STATE_LAUNCHING then
+		self.launch_timer = self.launch_timer - dt
+		if self.launch_timer <= 0 then
+			self.state = STATE_FREE
+			go.set("#collisionobject", "linear_damping", DAMPING_FREE)
+		end
+	end
+
+	if self.state == STATE_HOOKED and #self.cables > 0 then
+		local player_pos = go.get_position()
+		local primary = self.cables[#self.cables]
+		local to_anchor = primary.anchor_pos - player_pos
+		local dist = vmath.length(to_anchor)
+
+		if dist > 0.01 then
+			local radial = vmath.normalize(to_anchor)
+			local tangent = vmath.vector3(-radial.y, radial.x, 0)
+			local input_len = vmath.length(self.input)
+
+			if input_len > 0.01 then
+				local tangent_input = vmath.dot(self.input, tangent)
+				local momentum_mult = 1.0 + (self.chain_count * CHAIN_BONUS)
+				local force = tangent * tangent_input * SWING_FORCE * momentum_mult
+
+				msg.post("#collisionobject", "apply_force", {
+					force = force,
+					position = go.get_world_position()
+				})
+			end
+		end
+
+		if self.use_manual_constraint then
+			for _, cable in ipairs(self.cables) do
+				constrain_to_rope(cable, vel)
+			end
+		end
+
+	elseif self.state == STATE_FREE then
+		local input_len = vmath.length(self.input)
+		if input_len > 0.01 then
+			local force = self.input * FREE_MOVE_FORCE
+			msg.post("#collisionobject", "apply_force", {
+				force = force,
+				position = go.get_world_position()
+			})
+		end
+	end
+
+	if speed > MAX_SPEED then
+		vel = vmath.normalize(vel) * MAX_SPEED
+		go.set("#collisionobject", "linear_velocity", vel)
+		speed = MAX_SPEED
+	end
+
+	local lead_offset = vmath.vector3(0, 0, 0)
+	if speed > 50 then
+		lead_offset = vmath.normalize(vel) * speed * 0.15
+	end
+	msg.post("/camera#camera_script", "set_lead", { offset = lead_offset })
+
+	msg.post("/hud#hud", "update_speed", { speed = math.floor(speed) })
+	msg.post("/hud#hud", "update_chain", { chain = self.chain_count })
+	msg.post("/hud#hud", "update_cables", { count = #self.cables, max = MAX_CABLES })
+
+	for _, cable in ipairs(self.cables) do
+		msg.post("@render:", "draw_line", {
+			start_point = go.get_world_position(),
+			end_point = cable.anchor_pos,
+			color = vmath.vector4(0.4, 0.8, 1.0, 1.0)
+		})
+	end
+end
+
+function constrain_to_rope(cable, vel)
+	local player_pos = go.get_position()
+	local to_anchor = cable.anchor_pos - player_pos
+	local dist = vmath.length(to_anchor)
+
+	if dist > cable.rope_length then
+		local radial = vmath.normalize(to_anchor)
+		local new_pos = cable.anchor_pos - radial * cable.rope_length
+		go.set_position(new_pos)
+
+		local radial_vel = vmath.dot(vel, radial)
+		if radial_vel < 0 then
+			vel = vel - radial * radial_vel
+			go.set("#collisionobject", "linear_velocity", vel)
+		end
+	end
+end
+
+local function fire_hook(self)
+	local player_pos = go.get_position()
+	local target = stw.screen_to_world(self.mouse_screen.x, self.mouse_screen.y, "/camera")
+	local dir = target - player_pos
+	local dist = vmath.length(dir)
+
+	if dist < 1 then return end
+	if dist > HOOK_MAX_RANGE then
+		target = player_pos + vmath.normalize(dir) * HOOK_MAX_RANGE
+		dist = HOOK_MAX_RANGE
+	end
+
+	local result = physics.raycast(player_pos, target, { hash("wall"), hash("anchor") })
+	if not result then return end
+
+	if not self.timer_running then
+		self.timer_running = true
+		self.elapsed_time = 0
+	end
+
+	local now = socket.gettime()
+	if (now - self.last_release_time) < CHAIN_WINDOW and self.last_release_time > 0 then
+		self.chain_count = self.chain_count + 1
+	else
+		self.chain_count = 0
+	end
+
+	if #self.cables >= MAX_CABLES then
+		table.remove(self.cables, 1)
+	end
+
+	local anchor_pos = vmath.vector3(result.position.x, result.position.y, 0)
+	local rope_length = vmath.length(anchor_pos - player_pos)
+
+	local cable = {
+		anchor_pos = anchor_pos,
+		rope_length = rope_length,
+		attach_time = now,
+	}
+	table.insert(self.cables, cable)
+
+	self.state = STATE_HOOKED
+	go.set("#collisionobject", "linear_damping", DAMPING_HOOKED)
+end
+
+local function release_all(self)
+	if #self.cables == 0 then return end
+
+	self.cables = {}
+	self.last_release_time = socket.gettime()
+	self.state = STATE_LAUNCHING
+	self.launch_timer = LAUNCH_DURATION
+	go.set("#collisionobject", "linear_damping", DAMPING_LAUNCH)
+end
+
+local function restart(self)
+	self.cables = {}
+	self.chain_count = 0
+	self.timer_running = false
+	self.elapsed_time = 0
+	self.last_release_time = 0
+	self.state = STATE_FREE
+	self.checkpoints_hit = 0
+	go.set("#collisionobject", "linear_damping", DAMPING_FREE)
+	go.set("#collisionobject", "linear_velocity", vmath.vector3())
+	go.set_position(vmath.vector3(480, 320, 0))
+	msg.post("/hud#hud", "update_timer", { time = 0 })
+	msg.post("/hud#hud", "reset")
+	msg.post("/level#level_script", "reset_checkpoints")
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("move_up") then
+		if action.pressed then self.input.y = 1
+		elseif action.released then self.input.y = 0 end
+	elseif action_id == hash("move_down") then
+		if action.pressed then self.input.y = -1
+		elseif action.released then self.input.y = 0 end
+	elseif action_id == hash("move_left") then
+		if action.pressed then self.input.x = -1
+		elseif action.released then self.input.x = 0 end
+	elseif action_id == hash("move_right") then
+		if action.pressed then self.input.x = 1
+		elseif action.released then self.input.x = 0 end
+	elseif action_id == hash("fire_hook") then
+		if action.pressed then
+			fire_hook(self)
+		end
+	elseif action_id == hash("release_hooks") then
+		if action.pressed then
+			release_all(self)
+		end
+	elseif action_id == hash("restart") then
+		if action.pressed then
+			restart(self)
+		end
+	end
+
+	if not action_id then
+		self.mouse_screen.x = action.x
+		self.mouse_screen.y = action.y
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("checkpoint_hit") then
+		self.checkpoints_hit = (self.checkpoints_hit or 0) + 1
+		msg.post("/hud#hud", "checkpoint", { index = self.checkpoints_hit })
+	elseif message_id == hash("finish_hit") then
+		if self.timer_running then
+			self.timer_running = false
+			local final_time = self.elapsed_time
+			msg.post("/hud#hud", "finish", { time = final_time })
+		end
+	elseif message_id == hash("contact_point_response") then
+		-- wall collision handled by physics engine
+	end
+end

@@ -1,0 +1,22 @@
+go.property("anchor_x", 0)
+go.property("anchor_y", 0)
+
+function init(self)
+	self.anchor_pos = vmath.vector3(self.anchor_x, self.anchor_y, 0)
+end
+
+function update(self, dt)
+	local player_pos = go.get_position("/player")
+	local anchor = self.anchor_pos
+	local midpoint = (anchor + player_pos) * 0.5
+	go.set_position(midpoint)
+
+	local diff = anchor - player_pos
+	local length = vmath.length(diff)
+	local angle = math.atan2(diff.y, diff.x)
+	go.set_rotation(vmath.quat_rotation_z(angle))
+
+	local sx = length
+	local sy = 2
+	go.set_scale(vmath.vector3(sx, sy, 1))
+end

@@ -1,0 +1,24 @@
+go.property("target", msg.url())
+go.property("lerp_speed", 5.0)
+go.property("lead_factor", 0.15)
+
+function init(self)
+	msg.post("#camera", "acquire_camera_focus")
+	msg.post(".", "acquire_input_focus")
+	self.offset = vmath.vector3(0, 0, 0)
+end
+
+function update(self, dt)
+	local target_pos = go.get_position(self.target)
+	local desired = vmath.vector3(target_pos.x, target_pos.y, 0)
+	desired = desired + self.offset
+	local current = go.get_position()
+	local new_pos = vmath.lerp(math.min(self.lerp_speed * dt, 1.0), current, desired)
+	go.set_position(new_pos)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("set_lead") then
+		self.offset = message.offset or vmath.vector3(0, 0, 0)
+	end
+end

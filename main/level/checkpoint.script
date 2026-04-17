@@ -1,0 +1,27 @@
+go.property("checkpoint_id", 0)
+go.property("is_finish", false)
+
+function init(self)
+	self.hit = false
+	if not self.is_finish then
+		msg.post("/level#level_script", "register_checkpoint", { id = self.checkpoint_id })
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		if message.other_group == hash("player") and not self.hit then
+			self.hit = true
+			if self.is_finish then
+				msg.post("/level#level_script", "finish_triggered")
+			else
+				msg.post("/level#level_script", "checkpoint_triggered", { id = self.checkpoint_id })
+			end
+			local tint = self.is_finish and vmath.vector4(0.5, 0.5, 0.5, 1) or vmath.vector4(1, 0.6, 0, 1)
+			sprite.set_constant("#sprite", "tint", tint)
+		end
+	elseif message_id == hash("reset") then
+		self.hit = false
+		sprite.set_constant("#sprite", "tint", vmath.vector4(1, 1, 1, 1))
+	end
+end

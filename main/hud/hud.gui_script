@@ -1,0 +1,87 @@
+function init(self)
+	self.timer_node = gui.get_node("timer")
+	self.best_time_node = gui.get_node("best_time")
+	self.chain_node = gui.get_node("chain")
+	self.speed_node = gui.get_node("speed")
+	self.cables_node = gui.get_node("cables")
+	self.message_node = gui.get_node("message")
+
+	gui.set_text(self.message_node, "")
+
+	self.best_time = load_best_time()
+	if self.best_time > 0 then
+		gui.set_text(self.best_time_node, string.format("BEST: %s", format_time(self.best_time)))
+	else
+		gui.set_text(self.best_time_node, "BEST: --:--.---")
+	end
+end
+
+function format_time(t)
+	local mins = math.floor(t / 60)
+	local secs = t - mins * 60
+	return string.format("%02d:%06.3f", mins, secs)
+end
+
+function load_best_time()
+	local data = sys.load("g_hook_save")
+	return data.best_time or 0
+end
+
+function save_best_time(t)
+	sys.save("g_hook_save", { best_time = t })
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("update_timer") then
+		gui.set_text(self.timer_node, format_time(message.time))
+
+	elseif message_id == hash("update_speed") then
+		gui.set_text(self.speed_node, "SPD: " .. tostring(message.speed))
+
+	elseif message_id == hash("update_chain") then
+		if message.chain > 0 then
+			gui.set_text(self.chain_node, "CHAIN x" .. tostring(message.chain + 1))
+			gui.set_color(self.chain_node, vmath.vector4(1, 0.8, 0, 1))
+		else
+			gui.set_text(self.chain_node, "")
+		end
+
+	elseif message_id == hash("update_cables") then
+		gui.set_text(self.cables_node, "HOOKS: " .. message.count .. "/" .. message.max)
+
+	elseif message_id == hash("checkpoint") then
+		gui.set_text(self.message_node, "CHECKPOINT " .. message.index)
+		gui.set_color(self.message_node, vmath.vector4(0, 1, 0.4, 1))
+		timer.delay(1.5, false, function()
+			gui.set_text(self.message_node, "")
+		end)
+
+	elseif message_id == hash("finish") then
+		local t = message.time
+		gui.set_text(self.timer_node, format_time(t))
+
+		local is_best = false
+		if self.best_time <= 0 or t < self.best_time then
+			self.best_time = t
+			save_best_time(t)
+			is_best = true
+		end
+
+		gui.set_text(self.best_time_node, string.format("BEST: %s", format_time(self.best_time)))
+
+		if is_best then
+			gui.set_text(self.message_node, "NEW BEST! " .. format_time(t))
+			gui.set_color(self.message_node, vmath.vector4(1, 0.9, 0, 1))
+		else
+			gui.set_text(self.message_node, "FINISH: " .. format_time(t))
+			gui.set_color(self.message_node, vmath.vector4(1, 1, 1, 1))
+		end
+
+	elseif message_id == hash("reset") then
+		gui.set_text(self.timer_node, "00:00.000")
+		gui.set_text(self.chain_node, "")
+		gui.set_text(self.speed_node, "SPD: 0")
+		gui.set_text(self.cables_node, "HOOKS: 0/3")
+		gui.set_text(self.message_node, "")
+	end
+end

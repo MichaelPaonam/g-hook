@@ -1,0 +1,36 @@
+key_trigger {
+  input: KEY_W
+  action: "move_up"
+}
+key_trigger {
+  input: KEY_S
+  action: "move_down"
+}
+key_trigger {
+  input: KEY_A
+  action: "move_left"
+}
+key_trigger {
+  input: KEY_D
+  action: "move_right"
+}
+key_trigger {
+  input: KEY_R
+  action: "restart"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_1
+  action: "fire_hook"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_2
+  action: "release_hooks"
+}
+mouse_trigger {
+  input: MOUSE_WHEEL_UP
+  action: "zoom_in"
+}
+mouse_trigger {
+  input: MOUSE_WHEEL_DOWN
+  action: "zoom_out"
+}

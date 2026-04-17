@@ -1,0 +1,40 @@
+function init(self)
+	self.checkpoints = {}
+	self.next_checkpoint = 1
+	self.all_checkpoints_hit = false
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("register_checkpoint") then
+		table.insert(self.checkpoints, {
+			id = message.id,
+			url = sender
+		})
+		table.sort(self.checkpoints, function(a, b) return a.id < b.id end)
+
+	elseif message_id == hash("checkpoint_triggered") then
+		if self.all_checkpoints_hit then return end
+
+		local cp_id = message.id
+		if cp_id == self.next_checkpoint then
+			self.next_checkpoint = self.next_checkpoint + 1
+			msg.post("/player#player", "checkpoint_hit", { index = cp_id })
+
+			if self.next_checkpoint > #self.checkpoints then
+				self.all_checkpoints_hit = true
+			end
+		end
+
+	elseif message_id == hash("finish_triggered") then
+		if self.all_checkpoints_hit then
+			msg.post("/player#player", "finish_hit")
+		end
+
+	elseif message_id == hash("reset_checkpoints") then
+		self.next_checkpoint = 1
+		self.all_checkpoints_hit = false
+		for _, cp in ipairs(self.checkpoints) do
+			msg.post(cp.url, "reset")
+		end
+	end
+end

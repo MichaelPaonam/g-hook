@@ -1,0 +1,35 @@
+[project]
+title = G-Hook
+version = 1.0
+
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/game.renderc
+
+[script]
+shared_state = 1
+
+[display]
+width = 960
+height = 640
+high_dpi = 1
+
+[physics]
+type = 2D
+gravity_y = 0.0
+gravity_x = 0.0
+scale = 0.02
+
+[input]
+game_binding = /input/game.input_bindingc
+
+[android]
+input_method = HiddenInputField
+
+[html5]
+heap_size = 256
+scale_mode = fit
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
