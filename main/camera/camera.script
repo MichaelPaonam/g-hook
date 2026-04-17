@@ -3,14 +3,25 @@ go.property("lerp_speed", 5.0)
 go.property("lead_factor", 0.15)
 
 function init(self)
-	msg.post("#camera", "acquire_camera_focus")
 	self.offset = vmath.vector3(0, 0, 0)
+	self.pan_offset = vmath.vector3(0, 0, 0)
+	self.panning = false
+	self.pan_return_speed = 3.0
+	-- snap to target immediately on first frame
+	local target_pos = go.get_position(self.target)
+	go.set_position(vmath.vector3(target_pos.x, target_pos.y, 0))
+	msg.post("@render:", "set_camera_pos", { pos = go.get_position() })
 end
 
 function update(self, dt)
+	-- when not panning, smoothly return pan_offset to zero
+	if not self.panning then
+		self.pan_offset = vmath.lerp(math.min(self.pan_return_speed * dt, 1.0), self.pan_offset, vmath.vector3(0, 0, 0))
+	end
+
 	local target_pos = go.get_position(self.target)
 	local desired = vmath.vector3(target_pos.x, target_pos.y, 0)
-	desired = desired + self.offset
+	desired = desired + self.offset + self.pan_offset
 	local current = go.get_position()
 	local new_pos = vmath.lerp(math.min(self.lerp_speed * dt, 1.0), current, desired)
 	go.set_position(new_pos)
@@ -20,5 +31,11 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == hash("set_lead") then
 		self.offset = message.offset or vmath.vector3(0, 0, 0)
+	elseif message_id == hash("pan_delta") then
+		self.pan_offset = self.pan_offset + message.delta
+	elseif message_id == hash("pan_start") then
+		self.panning = true
+	elseif message_id == hash("pan_end") then
+		self.panning = false
 	end
 end

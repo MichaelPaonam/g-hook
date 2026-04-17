@@ -2,57 +2,76 @@
 
 A 2D top-down grappling hook time-trial game built with [Defold](https://defold.com) for HTML5 browsers.
 
-Fire cables at anchor points, swing around them using momentum, chain hooks for speed boosts, and race through checkpoints as fast as possible.
+Fire cables at anchor points and walls, get pulled toward them, chain hooks for speed boosts, and race through checkpoints as fast as possible.
 
 ## Controls
 
 | Input | Action |
 |-------|--------|
-| **Left Click** | Fire grappling hook toward cursor |
-| **Right Click** | Release all cables |
-| **WASD** | Move (free) / Swing (hooked) |
+| **Q** | Fire grappling hook toward cursor |
+| **E** | Release all cables |
+| **WASD** | Move (weak steering force; retains momentum after cable release) |
+| **Right-click drag** | Pan camera |
+| **Scroll wheel** | Zoom in / out |
 | **R** | Restart run |
 
 ## How It Works
 
-This is a **top-down** game with **zero gravity**. Unlike a side-view grappling hook where gravity creates pendulum swings, momentum here comes entirely from player input:
+This is a **top-down** game with **zero gravity**. The mechanic is inspired by Fanny from Mobile Legends — you are **pulled toward anchor points**, not swinging like a pendulum:
 
-1. **Hook** — Left-click raycasts toward the cursor. If it hits a wall or anchor point, a cable is created.
-2. **Swing** — While hooked, WASD input is projected onto the **tangential** direction (perpendicular to the rope). This creates circular motion around the anchor.
-3. **Release** — Right-click destroys all cables. The player flies off at their current velocity.
-4. **Chain** — Hooking again within 1.5s of releasing keeps the chain alive. Each chain level adds a 15% speed multiplier.
+1. **Hook** — Press Q to raycast toward the cursor. If it hits a wall or anchor, a cable attaches.
+2. **Pull** — While hooked, the player is pulled toward the anchor:
+   - 1 cable → pulled directly toward it
+   - 2 cables → pulled toward the bisector of both anchors
+   - 3 cables → pulled toward the bisector of the **last two** anchors
+3. **Auto-release** — A cable releases automatically when the player arrives at the anchor.
+4. **Release** — Press E to drop all cables. The player coasts with preserved velocity.
+5. **Chain** — Re-hooking within 3 seconds keeps the chain alive. Each level adds +20% pull force.
 
-Up to 3 cables can be active simultaneously. The most recent cable acts as the primary swing pivot.
+Up to 3 cables can be active simultaneously. The oldest cable is dropped if a 4th is fired.
+
+## Level
+
+The arena is 3000×2000 pixels arranged as a **S-shaped hallway**:
+
+```
+Start (150, 300)  →  Corridor 1 (y≈300)  →  Turn 1  →
+Corridor 2 (y≈900)  →  Turn 2  →  Corridor 3 (y≈1500)  →  Finish
+```
+
+**Checkpoints must be hit in order** (1 → 2 → 3 → 4). Hitting a checkpoint out of order triggers a 1.5-second penalty and resets the run. The same applies to touching the finish before all checkpoints are cleared.
+
+The timer starts on the first hook fire, stops at the finish, and is displayed near the finish line in world space.
 
 ## Project Structure
 
 ```
 game.project                 # Defold project config (zero gravity, 960x640, HTML5)
-input/game.input_binding     # Mouse + WASD + R key bindings
+input/game.input_binding     # Q, E, WASD, R, right-click pan, scroll zoom
 render/
   game.render                # Custom render pipeline
-  game.render_script         # Camera-aware rendering + draw_line for cables
+  game.render_script         # Camera-aware rendering + draw_line for cables/walls/timer
 main/
   main.collection            # Game world: player, camera, walls, anchors, checkpoints
   player/
-    player.script            # Core game logic (movement, hook, swing, chain)
+    player.script            # Core game logic (movement, pull mechanic, chain, reset)
     player.atlas             # Player sprite
   camera/
-    camera.script            # Smooth follow with velocity-based lead
+    camera.script            # Smooth follow, velocity lead, right-click pan
   hook/
-    cable_line.script        # Rope visual rendering (stretched sprite)
+    cable_line.script        # (Unused — cables rendered via draw_line in player.script)
     cable.atlas              # Cable sprite
   level/
-    level.script             # Checkpoint ordering and finish detection
+    level.script             # Checkpoint ordering, finish detection, world-space timer
     checkpoint.script        # Per-checkpoint trigger and visual feedback
-    anchor.atlas             # Anchor point sprite
-    level.atlas              # Checkpoint/wall/finish sprites
+    anchor.atlas             # Anchor point sprite (48×16 yellow rectangle)
+    level.atlas              # Checkpoint/finish sprites
   hud/
-    hud.gui                  # HUD layout (timer, speed, chain, cables)
-    hud.gui_script           # HUD logic + best time persistence
+    hud.gui                  # HUD layout (speed, chain, cable count, messages)
+    hud.gui_script           # HUD logic + best time persistence (sys.save)
   util/
-    screen_to_world.lua      # Mouse screen coords to world coords
-assets/images/               # Placeholder PNGs (32x32 colored squares)
+    screen_to_world.lua      # Mouse screen coords → world coords (accounts for zoom)
+assets/images/               # Placeholder PNGs
 ```
 
 ## Setup
@@ -67,7 +86,7 @@ assets/images/               # Placeholder PNGs (32x32 colored squares)
    ```
    git clone https://github.com/MichaelPaonam/g-hook.git
    ```
-2. Open the project in Defold Editor: **File > Open Project** and select `game.project`.
+2. Open the project in Defold Editor: **File > Open Project** → select `game.project`.
 3. Fetch built-in libraries: **Project > Fetch Libraries**.
 4. Build and run: **Project > Build** (Cmd+B / Ctrl+B).
 
@@ -87,28 +106,20 @@ assets/images/               # Placeholder PNGs (32x32 colored squares)
 
 All physics constants are at the top of `main/player/player.script`:
 
-| Constant | Default | What It Does |
-|----------|---------|--------------|
-| `SWING_FORCE` | 5000 | Tangential force applied while hooked |
-| `FREE_MOVE_FORCE` | 2000 | Direct movement force when not hooked |
-| `MAX_SPEED` | 800 | Velocity cap (px/s) |
-| `DAMPING_FREE` | 0.4 | Ground friction when walking |
-| `DAMPING_HOOKED` | 0.05 | Reduced friction while swinging |
+| Constant | Value | What It Does |
+|----------|-------|--------------|
+| `PULL_FORCE` | 500 | Force pulling player toward anchor(s) |
+| `FREE_MOVE_FORCE` | 90 | Steering force when not hooked |
+| `MAX_SPEED` | 900 | Velocity cap (px/s) |
+| `DAMPING_FREE` | 0.6 | Friction when walking freely |
+| `DAMPING_HOOKED` | 0.02 | Near-zero friction while being pulled |
+| `DAMPING_LAUNCH` | 0.25 | Gradual decel after cable release |
+| `LAUNCH_DURATION` | 1.5 | Seconds of reduced friction after release |
 | `MAX_CABLES` | 3 | Simultaneous cable limit |
-| `CHAIN_WINDOW` | 1.5 | Seconds to maintain chain between hooks |
-| `CHAIN_BONUS` | 0.15 | Speed multiplier per chain level (15%) |
-| `HOOK_MAX_RANGE` | 600 | Max raycast distance for hooks |
-
-## Level Layout
-
-The arena is 3000x2000 pixels with:
-- 4 boundary walls
-- 3 internal wall segments creating corridors
-- 12 anchor points distributed for continuous swing paths
-- 4 checkpoints forming a circuit
-- 1 finish line near the spawn point
-
-To add or move anchors/checkpoints, edit `main/main.collection` in the Defold Editor (or modify the protobuf text directly).
+| `CHAIN_WINDOW` | 3.0 | Seconds to maintain chain between hooks |
+| `CHAIN_BONUS` | 0.20 | Pull multiplier per chain level (+20%) |
+| `HOOK_MAX_RANGE` | 1200 | Max raycast distance (px) |
+| `AUTO_RELEASE_DIST` | 120 | Distance at which cable auto-releases |
 
 ## License
 

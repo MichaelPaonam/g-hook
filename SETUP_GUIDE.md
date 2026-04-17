@@ -28,8 +28,6 @@ main/main.collection
 main/player/player.script
 main/player/player.atlas
 main/camera/camera.script
-main/hook/cable_line.script
-main/hook/cable.atlas
 main/level/level.script
 main/level/checkpoint.script
 main/level/anchor.atlas
@@ -37,7 +35,7 @@ main/level/level.atlas
 main/hud/hud.gui
 main/hud/hud.gui_script
 main/util/screen_to_world.lua
-assets/images/*.png (8 files)
+assets/images/*.png
 ```
 
 ---
@@ -49,13 +47,15 @@ assets/images/*.png (8 files)
 2. Watch the Console panel at the bottom for errors
 
 ### 2.2 If It Builds Successfully
-- You should see a dark background with:
-  - A cyan square (player) at center
-  - Yellow squares (anchor points) scattered around
-  - Green squares (checkpoints) along the course
-  - A red square (finish line) near bottom
-  - HUD text at the top (timer, speed, hooks)
-- Try the controls: WASD to move, left-click toward an anchor to hook
+You should see:
+- A cyan square (player) near the top-left at ~(150, 300) world coords
+- Yellow rectangular anchor strips along the corridor walls
+- Green squares (checkpoints 1–4) along the S-shaped route
+- A red square (finish line) near bottom-right
+- A world-space timer near the finish (displays when first cable fires)
+- HUD overlays at the top (speed, chain, cable count)
+
+Controls: **Q** to fire hook, **E** to release, **WASD** for light steering, **right-click drag** to pan, **scroll** to zoom, **R** to restart.
 
 ### 2.3 If the Collection Fails to Parse
 The `main.collection` file uses hand-written protobuf text which may have format issues. If the editor shows errors:
@@ -73,225 +73,226 @@ The Console will show line numbers. Common issues:
 
 ## Phase 3: Manual Collection Setup (If Parse Fails)
 
-If `main.collection` doesn't parse, recreate the game world manually in the editor. This takes ~30 minutes but guarantees correctness.
+If `main.collection` doesn't parse, recreate the game world manually in the editor.
 
 ### 3.1 Create a Fresh Collection
 1. Right-click `main/` in Asset Browser > **New > Collection**
 2. Name it `main` (overwrite the existing file when prompted)
 
 ### 3.2 Add the Player
-1. In the Outline panel, right-click **Collection** (root) > **Add Game Object**
+1. In the Outline panel, right-click **Collection** > **Add Game Object**
 2. Set **Id** to `player`
-3. Set **Position** to `X: 480, Y: 320, Z: 0`
+3. Set **Position** to `X: 150, Y: 300, Z: 0`
 4. Right-click `player` > **Add Component From File** > select `main/player/player.script`
-5. Right-click `player` > **Add Component (Embedded)** > choose **Sprite**
+5. Right-click `player` > **Add Component (Embedded)** > **Sprite**
    - Set **Image** to `/main/player/player.atlas`
    - Set **Default Animation** to `idle`
    - Set **Material** to `/builtins/materials/sprite.material`
-   - Set sprite **Z position** to `0.1` (renders above floor)
-6. Right-click `player` > **Add Component (Embedded)** > choose **Collision Object**
-   - Set **Type** to `Dynamic`
-   - Set **Mass** to `1.0`
-   - Set **Friction** to `0.1`
-   - Set **Restitution** to `0.3`
-   - Set **Linear Damping** to `0.4`
-   - Set **Angular Damping** to `1.0`
-   - Check **Locked Rotation** = true
-   - Set **Group** to `player`
-   - Set **Mask** to `wall, anchor, checkpoint`
-   - Right-click the collision object > **Add Shape** > **Sphere** > radius `16`
+   - Set sprite **Z position** to `0.1`
+6. Right-click `player` > **Add Component (Embedded)** > **Collision Object**
+   - Type: `Dynamic`, Mass: `1.0`, Friction: `0.1`, Restitution: `0.3`
+   - Linear Damping: `0.6`, Angular Damping: `1.0`
+   - Locked Rotation: `true`
+   - Group: `player`, Mask: `wall, anchor, checkpoint`
+   - Add Shape > **Sphere** > radius `16`
 
 ### 3.3 Add the Camera
 1. Right-click **Collection** > **Add Game Object**
 2. Set **Id** to `camera`
-3. Set **Position** to `X: 480, Y: 320, Z: 0`
-4. Right-click `camera` > **Add Component From File** > select `main/camera/camera.script`
-   - In Properties panel, set the `target` property to `/player`
-5. Right-click `camera` > **Add Component (Embedded)** > choose **Camera**
-   - Set **Orthographic Projection** = checked (1)
-   - Set **Orthographic Zoom** = `1.0`
-   - Set **Near Z** = `-1.0`
-   - Set **Far Z** = `1.0`
+3. Set **Position** to `X: 150, Y: 300, Z: 0` (match player start)
+4. Right-click `camera` > **Add Component From File** > `main/camera/camera.script`
+   - Set the `target` property to `/player`
+5. Right-click `camera` > **Add Component (Embedded)** > **Camera**
+   - Orthographic Projection: checked
+   - Orthographic Zoom: `1.0`
+   - Near Z: `-1.0`, Far Z: `1.0`
+   - **Do not** call `acquire_camera_focus` — the render script uses `set_camera_pos` messaging instead
 
 ### 3.4 Add the Level Controller
-1. Right-click **Collection** > **Add Game Object**
-2. Set **Id** to `level`
-3. Position: `0, 0, 0`
-4. Right-click `level` > **Add Component From File** > select `main/level/level.script`
+1. Right-click **Collection** > **Add Game Object**, Id: `level`, Position: `0, 0, 0`
+2. Right-click `level` > **Add Component From File** > `main/level/level.script`
+   - Script Id must be `level_script` (the player messages `/level#level_script`)
 
 ### 3.5 Add the HUD
-1. Right-click **Collection** > **Add Game Object**
-2. Set **Id** to `hud`
-3. Position: `0, 0, 0`
-4. Right-click `hud` > **Add Component From File** > select `main/hud/hud.gui`
+1. Right-click **Collection** > **Add Game Object**, Id: `hud`, Position: `0, 0, 0`
+2. Right-click `hud` > **Add Component From File** > `main/hud/hud.gui`
+   - Script Id must be `hud`
 
-### 3.6 Add Arena Walls
-Create 4 game objects for the boundary. For each wall:
+### 3.6 Add Arena Walls (Boundary)
 
-1. Right-click **Collection** > **Add Game Object**
-2. Right-click the game object > **Add Component (Embedded)** > **Collision Object**
-   - Type: `Static`
-   - Group: `wall`
-   - Mask: `player`
-   - Add Shape > **Box**
+For each wall, create a game object with an embedded **Collision Object**:
+- Type: `Static`, Group: `wall`, Mask: `player`
+- Add Shape > **Box**
 
-| Wall Id | Position (X, Y) | Box Size (W, H, D) |
-|---------|-----------------|---------------------|
-| `wall_bottom` | 1500, 0 | 1500, 16, 10 |
-| `wall_top` | 1500, 2000 | 1500, 16, 10 |
-| `wall_left` | 0, 1000 | 16, 1000, 10 |
-| `wall_right` | 3000, 1000 | 16, 1000, 10 |
+| Wall Id | Position (X, Y) | Box Half-extents (W, H) |
+|---------|-----------------|--------------------------|
+| `wall_bottom` | 1500, 0 | 1500, 8 |
+| `wall_top` | 1500, 2000 | 1500, 8 |
+| `wall_left` | 0, 1000 | 8, 1000 |
+| `wall_right` | 3000, 1000 | 8, 1000 |
 
-Then add 3 internal walls:
+**Note:** Box shape dimensions in Defold are **half-extents** (half the total size).
 
-| Wall Id | Position (X, Y) | Box Size (W, H, D) |
-|---------|-----------------|---------------------|
-| `wall_mid_1` | 900, 700 | 300, 16, 10 |
-| `wall_mid_2` | 1800, 1000 | 16, 300, 10 |
-| `wall_mid_3` | 2200, 1400 | 400, 16, 10 |
+### 3.7 Add Internal Corridor Walls
 
-### 3.7 Add Anchor Points
-For each anchor, create a game object with:
-- A **Sprite** component: Image = `/main/level/anchor.atlas`, Animation = `idle`
-- A **Collision Object**: Type = `Static`, Group = `anchor`, Mask = `player`
-  - Add Sphere shape, radius = `24`
+The level uses a hallway layout. These walls create the S-shaped corridor:
 
-| Anchor Id | Position (X, Y) |
-|-----------|-----------------|
-| `anchor_1` | 300, 500 |
-| `anchor_2` | 600, 300 |
-| `anchor_3` | 700, 900 |
-| `anchor_4` | 1200, 500 |
-| `anchor_5` | 1200, 1000 |
-| `anchor_6` | 1500, 1500 |
-| `anchor_7` | 2000, 800 |
-| `anchor_8` | 2500, 1200 |
-| `anchor_9` | 2700, 500 |
-| `anchor_10` | 400, 1500 |
-| `anchor_11` | 900, 1700 |
-| `anchor_12` | 2000, 1700 |
+| Wall Id | Position (X, Y) | Half-extents (W, H) | Purpose |
+|---------|-----------------|----------------------|---------|
+| `wall_mid_1` | 550, 450 | 450, 8 | Seg1 top |
+| `wall_mid_2` | 550, 150 | 450, 8 | Seg1 bottom |
+| `wall_mid_3` | 900, 600 | 8, 150 | Turn1 left |
+| `wall_mid_4` | 1050, 600 | 8, 150 | Turn1 right |
+| `wall_mid_5` | 1600, 1050 | 550, 8 | Seg2 top |
+| `wall_mid_6` | 1600, 750 | 550, 8 | Seg2 bottom |
+| `wall_mid_7` | 2150, 1200 | 8, 150 | Turn2 |
 
-### 3.8 Add Checkpoints
-For each checkpoint, create a game object with:
-- A **Sprite**: Image = `/main/level/level.atlas`, Animation = `checkpoint`
-  - Set sprite Z to `0.05`
-- A **Collision Object**: Type = `Trigger`, Group = `checkpoint`, Mask = `player`
-  - Add Sphere shape, radius = `40`
-- **Add Component From File** > `main/level/checkpoint.script`
+### 3.8 Add Anchor Points
+
+For each anchor:
+- **Sprite**: Image = `/main/level/anchor.atlas`, Animation = `idle`
+- **Collision Object**: Type = `Static`, Group = `anchor`, Mask = `player`
+  - Shape = **Box**, half-extents `24, 8, 1` (matches 48×16 sprite at scale 1×)
+- **Scale**: `2, 2, 1` (scales sprite and collision to 96×32)
+
+Place anchors along the corridor route so at least 2–3 are reachable from any position:
+
+| Anchor Id | Position (X, Y) | Orientation |
+|-----------|-----------------|-------------|
+| `anchor_1` | 200, 400 | horizontal |
+| `anchor_2` | 550, 300 | horizontal |
+| `anchor_3` | 550, 400 | horizontal |
+| `anchor_4` | 700, 250 | horizontal |
+| `anchor_5` | 850, 350 | horizontal |
+| `anchor_6` | 1050, 850 | horizontal |
+| `anchor_7` | 1100, 950 | horizontal |
+| `anchor_8` | 1600, 900 | horizontal |
+| `anchor_9` | 2000, 900 | horizontal |
+| `anchor_10` | 2100, 1000 | horizontal |
+| `anchor_11` | 2500, 1300 | horizontal |
+| `anchor_12` | 2800, 1600 | horizontal |
+
+### 3.9 Add Checkpoints
+
+For each checkpoint:
+- **Sprite**: Image = `/main/level/level.atlas`, Animation = `checkpoint`, Z = `0.05`
+- **Collision Object**: Type = `Trigger`, Group = `checkpoint`, Mask = `player`
+  - Shape = **Sphere**, radius = `40`
+- **Component From File**: `main/level/checkpoint.script`
   - Set `checkpoint_id` property to the number below
-- Set **Scale** to `2, 2, 1`
+  - Leave `is_finish` = `false`
+- **Scale**: `2, 2, 1`
 
-| Checkpoint Id | Property `checkpoint_id` | Position (X, Y) |
-|---------------|--------------------------|-----------------|
-| `cp_1` | 1 | 800, 400 |
-| `cp_2` | 2 | 1500, 800 |
-| `cp_3` | 3 | 2400, 1400 |
-| `cp_4` | 4 | 1000, 1600 |
+| Checkpoint Id | `checkpoint_id` | Position (X, Y) |
+|---------------|-----------------|-----------------|
+| `cp_1` | 1 | 950, 300 |
+| `cp_2` | 2 | 1100, 900 |
+| `cp_3` | 3 | 2100, 900 |
+| `cp_4` | 4 | 2500, 1500 |
 
-### 3.9 Add Finish Line
-1. Create game object with Id `finish`
-2. Position: `480, 200`
-3. Scale: `3, 3, 1`
-4. Add Sprite: Image = `/main/level/level.atlas`, Animation = `finish`, Z = `0.05`
-5. Add Collision Object: Type = `Trigger`, Group = `checkpoint`, Mask = `player`
+**Order matters.** Touching them out of order triggers a 1.5s penalty and resets the run.
+
+### 3.10 Add Finish Line
+1. Create game object, Id: `finish`, Position: `2900, 1700`
+2. Scale: `3, 3, 1`
+3. Add Sprite: Image = `/main/level/level.atlas`, Animation = `finish`, Z = `0.05`
+4. Add Collision Object: Type = `Trigger`, Group = `checkpoint`, Mask = `player`
    - Sphere shape, radius = `50`
-6. Add Component From File > `main/level/checkpoint.script`
+5. Add Component From File > `main/level/checkpoint.script`
    - Set `is_finish` = `true`
+   - The script will send `register_finish` to level so it can reset on wrong-order penalty
 
-### 3.10 Build and Test
+### 3.11 Build and Test
 1. **Project > Build** (Cmd+B)
-2. You should now have a working game
 
 ---
 
 ## Phase 4: Verify Core Mechanics
 
-Test each mechanic in order:
-
 ### 4.1 Movement
-- [x] WASD moves the player
-- [x] Player collides with walls and stops
-- [x] Player slides along walls (doesn't stick)
+- [ ] WASD moves the player (light steering force)
+- [ ] Player collides with walls
+- [ ] Player retains momentum after cable release (DAMPING_LAUNCH window)
 
-### 4.2 Hook Firing
-- [x] Left-click fires toward cursor
-- [x] Cable line appears from player to hit point
-- [x] Hooking to anchor points works
-- [x] Hooking to walls works
-- [x] Missing (clicking empty space) does nothing
+### 4.2 Hook Firing (Q key)
+- [ ] Q fires toward cursor
+- [ ] Blue cable line appears from player to hit point
+- [ ] Hooking to anchor points works (cable attaches to anchor center)
+- [ ] Hooking to walls works (cable attaches to surface hit point)
+- [ ] Missing (aiming at empty space) does nothing
 
-### 4.3 Swing
-- [x] While hooked, WASD creates circular motion (not linear)
-- [x] Player stays within rope length of anchor
-- [x] Swing speed increases with sustained input
-- [x] Multiple cables constrain simultaneously
+### 4.3 Pull Mechanic
+- [ ] 1 cable: player is pulled directly toward anchor
+- [ ] 2 cables: player moves toward bisector of both anchors
+- [ ] 3 cables: player moves toward bisector of the last two anchors
+- [ ] Player is capped at MAX_SPEED (900 px/s)
+- [ ] Cable auto-releases when player arrives at anchor (within 120px)
 
-### 4.4 Release
-- [x] Right-click releases all cables
-- [x] Player flies off with preserved velocity
-- [x] Brief "launch" feel (low friction for 0.5s)
+### 4.4 Release (E key)
+- [ ] E releases all cables
+- [ ] Player coasts for ~1.5s before friction increases
+- [ ] Player retains full velocity direction at moment of release
 
 ### 4.5 Chain Momentum
-- [x] Quick re-hook shows chain counter in HUD
-- [x] Higher chain = noticeably faster swings
-- [x] Chain resets after 1.5s without hooking
+- [ ] Re-hooking within 3s shows chain counter in HUD
+- [ ] Higher chain = noticeably stronger pull
+- [ ] Chain resets after 3s gap
 
-### 4.6 Time Trial
-- [x] Timer starts on first hook fire
-- [x] Passing checkpoints in order triggers "CHECKPOINT N"
-- [x] Passing finish after all checkpoints shows final time
-- [x] R key resets everything
-- [x] Best time persists across restarts
+### 4.6 Checkpoint Ordering
+- [ ] Checkpoints 1–4 are numbered (7-segment labels drawn above them)
+- [ ] Hitting them in order advances to next
+- [ ] Hitting them out of order shows "WRONG ORDER! RESETTING..." message
+- [ ] Run resets after 1.5s penalty
+- [ ] Touching finish before all 4 checkpoints also triggers reset
+
+### 4.7 Timer
+- [ ] Timer starts on first hook fire (Q press that connects)
+- [ ] Timer displayed near finish line in world space (7-segment format: M:SS.T)
+- [ ] Timer stops when finish is crossed after all 4 checkpoints
+- [ ] R key resets timer, player position, and all checkpoint states
 
 ---
 
 ## Phase 5: Tuning
 
-Open `main/player/player.script` and adjust these constants (lines 3-13):
+Open `main/player/player.script` and adjust these constants (lines 3–14):
 
-### If swinging feels too weak:
-- Increase `SWING_FORCE` (try 8000-10000)
+| Constant | Default | Adjust If... |
+|----------|---------|--------------|
+| `PULL_FORCE` | 500 | Pull feels too weak/strong |
+| `FREE_MOVE_FORCE` | 90 | Walking feels too sluggish/snappy |
+| `MAX_SPEED` | 900 | Game feels too slow/fast |
+| `DAMPING_FREE` | 0.6 | Player slides too much/stops too fast |
+| `DAMPING_HOOKED` | 0.02 | Player decelerates while being pulled |
+| `DAMPING_LAUNCH` | 0.25 | Post-release decel too quick/slow |
+| `LAUNCH_DURATION` | 1.5 | Coast window after cable release |
+| `CHAIN_WINDOW` | 3.0 | Hard/easy to maintain chain |
+| `CHAIN_BONUS` | 0.20 | Chain speed boost too small/big |
+| `HOOK_MAX_RANGE` | 1200 | Can't reach anchors / too easy |
+| `AUTO_RELEASE_DIST` | 120 | Cable releases too early/late |
 
-### If the player slides too much when walking:
-- Increase `DAMPING_FREE` (try 0.6-0.8)
-
-### If speed caps feel limiting:
-- Increase `MAX_SPEED` (try 1000-1200)
-
-### If chains are hard to maintain:
-- Increase `CHAIN_WINDOW` (try 2.0-2.5 seconds)
-
-### If hooks don't reach far enough:
-- Increase `HOOK_MAX_RANGE` (try 800-1000)
-
-### Tuning loop:
-1. Change a constant
-2. **Cmd+B** to rebuild (Defold hot-reloads)
-3. Test the feel
-4. Repeat
+**Tuning loop:** Change constant → Cmd+B → test → repeat.
 
 ---
 
-## Phase 6: Replace Placeholder Art
+## Phase 6: Known Limitations
 
-The current sprites are solid-color squares. To improve them:
+- Cable rendering uses `draw_line` (thin debug lines, no thickness or glow)
+- Wall rendering uses `draw_line` (visible only — collision is physics-driven)
+- Placeholder sprites are solid-color squares/rectangles
+- Single level only
+- No sound effects
+- Best time persists via `sys.save()` (works in HTML5 via localStorage)
 
-### 6.1 Replace Images
-Put new PNG files in `assets/images/`, replacing:
-- `player.png` — 32x32, should show direction (arrow or triangle)
-- `anchor.png` — 16x16, hook attachment point (diamond, glow, ring)
-- `wall.png` — 32x32, wall tile
-- `checkpoint.png` — 24x24, gate/ring
-- `finish.png` — 24x24, finish marker (flag, star)
+### Render Pipeline Note
+The render script (`render/game.render_script`) uses a custom camera system:
+- Camera sends `set_camera_pos` message each frame to the render script
+- Render script builds the view matrix using `vmath.matrix4_look_at`
+- Zoom factor is **0.5** (world is shown at 2× scale) — defined in both `game.render_script` and `main/util/screen_to_world.lua`
+- **Do not** add a Camera component with `acquire_camera_focus` — it overrides the render projection and breaks GUI
 
-### 6.2 Update Atlases (if dimensions change)
-If you change image sizes, open each `.atlas` file in the editor and verify the images still load correctly. The atlas auto-packs on build.
-
-### 6.3 Upgrade Cable Rendering
-The cables currently use `draw_line` (thin debug lines). To upgrade:
-1. Open `main/player/player.script`
-2. In the `update()` function, the `draw_line` call (line 110-114) renders cables
-3. For thicker styled cables: use factory-spawned `cable_line.go` objects instead (the `cable_line.script` is already written for this approach)
+### Atlas Format Note
+Defold atlas files (`.atlas`) only allow `animations {}` blocks. Do **not** add top-level `images {}` blocks — they cause "atlas in use by another instance" errors at build time. All images must be inside an `animations {}` block.
 
 ---
 
@@ -311,18 +312,21 @@ Open `http://localhost:8080` in browser.
 
 ### 7.3 Test Checklist
 - [ ] Game loads without console errors
-- [ ] All sprites render
-- [ ] Mouse input works for hook firing
-- [ ] WASD movement works
-- [ ] HUD text displays correctly
-- [ ] Best time saves and persists on page refresh (localStorage)
+- [ ] All sprites render (no missing texture errors)
+- [ ] Q fires hook, E releases
+- [ ] WASD steering works
+- [ ] Right-click drag pans camera
+- [ ] Scroll wheel zooms
+- [ ] Checkpoint ordering enforced (wrong order resets)
+- [ ] Timer starts on first hook, stops at finish
+- [ ] Best time persists on page refresh (localStorage via sys.save)
 - [ ] Test in both Chrome and Firefox
 
 ### 7.4 Ship to itch.io
 1. Zip the entire output folder
-2. On itch.io: create new project > upload zip
+2. On itch.io: create new project → upload zip
 3. Set **Kind of project** = HTML
-4. Set **Viewport dimensions** = 960 x 640
+4. Set **Viewport dimensions** = 960 × 640
 5. Check **SharedArrayBuffer support** if prompted
 
 ---
@@ -340,10 +344,12 @@ Open `http://localhost:8080` in browser.
 ### Key Files to Edit
 | What to change | File |
 |----------------|------|
-| Physics feel | `main/player/player.script` (lines 3-13) |
+| Physics / pull feel | `main/player/player.script` (lines 3–14) |
 | Level layout | `main/main.collection` (in editor) |
+| Corridor walls | `main/level/level.script` (WALLS table) |
+| Checkpoint positions/labels | `main/level/level.script` (CHECKPOINTS table) |
 | Camera behavior | `main/camera/camera.script` |
-| HUD display | `main/hud/hud.gui` (in editor) + `hud.gui_script` |
+| HUD display | `main/hud/hud.gui` + `hud.gui_script` |
 | Controls | `input/game.input_binding` (in editor) |
-| Background color | `render/game.render_script` (line 7) |
-| Hook max range | `main/player/player.script` line 13 |
+| Background color | `render/game.render_script` |
+| Zoom level | `render/game.render_script` zoom constant + `main/util/screen_to_world.lua` ZOOM constant (must match) |

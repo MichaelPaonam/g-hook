@@ -77,6 +77,10 @@ function on_message(self, message_id, message, sender)
 			gui.set_color(self.message_node, vmath.vector4(1, 1, 1, 1))
 		end
 
+	elseif message_id == hash("show_message") then
+		gui.set_text(self.message_node, message.text)
+		gui.set_color(self.message_node, vmath.vector4(1, 0.2, 0.2, 1))
+
 	elseif message_id == hash("reset") then
 		gui.set_text(self.timer_node, "00:00.000")
 		gui.set_text(self.chain_node, "")
