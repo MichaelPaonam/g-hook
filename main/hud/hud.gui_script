@@ -1,3 +1,5 @@
+local wavedash = require("main.wavedash")
+
 function init(self)
 	self.timer_node = gui.get_node("timer")
 	self.best_time_node = gui.get_node("best_time")
@@ -14,6 +16,9 @@ function init(self)
 	else
 		gui.set_text(self.best_time_node, "BEST: --:--.---")
 	end
+
+	wavedash.update_load_progress(1)
+	wavedash.init()
 end
 
 function format_time(t)

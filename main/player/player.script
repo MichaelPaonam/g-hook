@@ -17,6 +17,20 @@ local STATE_FREE = 1
 local STATE_HOOKED = 2
 local STATE_LAUNCHING = 3
 
+local function destroy_cable_visual(cable)
+	if cable and cable.visual_id then
+		go.delete(cable.visual_id, true)
+		cable.visual_id = nil
+	end
+end
+
+local function clear_cables(self)
+	for _, cable in ipairs(self.cables) do
+		destroy_cable_visual(cable)
+	end
+	self.cables = {}
+end
+
 function init(self)
 	msg.post(".", "acquire_input_focus")
 	self.input = vmath.vector3()
@@ -37,7 +51,7 @@ function init(self)
 end
 
 local function restart(self)
-	self.cables = {}
+	clear_cables(self)
 	self.chain_count = 0
 	self.timer_running = false
 	self.elapsed_time = 0
@@ -131,6 +145,8 @@ function update(self, dt)
 			local passed_through = reached or (moving_away and dist < AUTO_RELEASE_DIST * 2.5)
 			if not passed_through then
 				table.insert(remaining, cable)
+			else
+				destroy_cable_visual(cable)
 			end
 		end
 		if #remaining < #self.cables then
@@ -169,14 +185,6 @@ function update(self, dt)
 	msg.post("/hud#hud", "update_speed", { speed = math.floor(speed) })
 	msg.post("/hud#hud", "update_chain", { chain = self.chain_count })
 	msg.post("/hud#hud", "update_cables", { count = #self.cables, max = MAX_CABLES })
-
-	for _, cable in ipairs(self.cables) do
-		msg.post("@render:", "draw_line", {
-			start_point = go.get_world_position(),
-			end_point = cable.anchor_pos,
-			color = vmath.vector4(0.4, 0.8, 1.0, 1.0)
-		})
-	end
 end
 
 function constrain_to_rope(cable, vel)
@@ -231,7 +239,8 @@ local function fire_hook(self)
 
 	if #self.cables >= MAX_CABLES then
 		-- drop oldest cable cleanly so it doesn't linger and cause swing-back
-		table.remove(self.cables, 1)
+		local dropped = table.remove(self.cables, 1)
+		destroy_cable_visual(dropped)
 		self.last_release_time = socket.gettime()
 	end
 
@@ -249,6 +258,10 @@ local function fire_hook(self)
 		anchor_pos = anchor_pos,
 		rope_length = rope_length,
 		attach_time = now,
+		visual_id = factory.create("#cable_factory", player_pos, nil, {
+			anchor_x = anchor_pos.x,
+			anchor_y = anchor_pos.y
+		})
 	}
 	table.insert(self.cables, cable)
 
@@ -259,7 +272,7 @@ end
 local function release_all(self)
 	if #self.cables == 0 then return end
 
-	self.cables = {}
+	clear_cables(self)
 	self.last_release_time = socket.gettime()
 	self.state = STATE_LAUNCHING
 	self.launch_timer = LAUNCH_DURATION
