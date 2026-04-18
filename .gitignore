@@ -1,6 +1,7 @@
 /.editor_settings
 /.internal
 /build
+/bundle
 .externalToolBuilders
 .DS_Store
 Thumbs.db
@@ -9,3 +10,4 @@ Thumbs.db
 .project
 .cproject
 builtins
+bob.jar
