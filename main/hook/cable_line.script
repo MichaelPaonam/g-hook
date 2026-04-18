@@ -17,6 +17,6 @@ function update(self, dt)
 	go.set_rotation(vmath.quat_rotation_z(angle))
 
 	local sx = length
-	local sy = 2
+	local sy = 1
 	go.set_scale(vmath.vector3(sx, sy, 1))
 end
