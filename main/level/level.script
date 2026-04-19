@@ -17,6 +17,7 @@ local WALLS = {
 	-- Turn2 wall
 	{2150, 1200, 8,    150},
 }
+local WALL_TEXTURE_SIZE = 32
 
 -- Checkpoint positions for drawing labels: {x, y, number}
 local CHECKPOINTS = {
@@ -114,26 +115,25 @@ function init(self)
 	self.elapsed = 0
 	self.timer_running = false
 	self.finished = false
+	self.wall_visuals = {}
+
+	for _, w in ipairs(WALLS) do
+		local cx, cy, hw, hh = w[1], w[2], w[3], w[4]
+		local wall_id = factory.create("#wall_factory", vmath.vector3(cx, cy, 0.01))
+		go.set_scale(vmath.vector3(
+			(hw * 2) / WALL_TEXTURE_SIZE,
+			(hh * 2) / WALL_TEXTURE_SIZE,
+			1
+		), wall_id)
+		table.insert(self.wall_visuals, wall_id)
+	end
 end
 
-local WALL_COLOR  = vmath.vector4(0.5, 0.5, 0.6, 1)
 local FINISH_X, FINISH_Y = 2900, 1700
 
 function update(self, dt)
 	if self.timer_running then
 		self.elapsed = self.elapsed + dt
-	end
-
-	for _, w in ipairs(WALLS) do
-		local cx, cy, hw, hh = w[1], w[2], w[3], w[4]
-		local tl = vmath.vector3(cx - hw, cy + hh, 0)
-		local tr = vmath.vector3(cx + hw, cy + hh, 0)
-		local br = vmath.vector3(cx + hw, cy - hh, 0)
-		local bl = vmath.vector3(cx - hw, cy - hh, 0)
-		msg.post("@render:", "draw_line", { start_point = tl, end_point = tr, color = WALL_COLOR })
-		msg.post("@render:", "draw_line", { start_point = tr, end_point = br, color = WALL_COLOR })
-		msg.post("@render:", "draw_line", { start_point = br, end_point = bl, color = WALL_COLOR })
-		msg.post("@render:", "draw_line", { start_point = bl, end_point = tl, color = WALL_COLOR })
 	end
 
 	-- draw sequence numbers above each checkpoint
@@ -149,6 +149,13 @@ function update(self, dt)
 	msg.post("@render:", "draw_line", { start_point = vmath.vector3(fx-10, fy,    0), end_point = vmath.vector3(fx+10, fy,    0), color = FINISH_COLOR })
 	msg.post("@render:", "draw_line", { start_point = vmath.vector3(fx-10, fy,    0), end_point = vmath.vector3(fx-10, fy-24, 0), color = FINISH_COLOR })
 	msg.post("@render:", "draw_line", { start_point = vmath.vector3(fx-10, fy-12, 0), end_point = vmath.vector3(fx+5,  fy-12, 0), color = FINISH_COLOR })
+end
+
+function final(self)
+	for _, wall_id in ipairs(self.wall_visuals or {}) do
+		go.delete(wall_id, true)
+	end
+	self.wall_visuals = {}
 end
 
 function on_message(self, message_id, message, sender)
