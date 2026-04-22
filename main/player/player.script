@@ -327,10 +327,6 @@ function on_input(self, action_id, action)
 			self.panning = false
 			msg.post("/camera#camera_script", "pan_end")
 		end
-	elseif action_id == hash("restart") then
-		if action.pressed then
-			restart(self)
-		end
 	end
 
 	if not action_id then
@@ -364,7 +360,8 @@ function on_message(self, message_id, message, sender)
 			local away = player_pos - cp_pos
 			if vmath.length(away) < 0.1 then away = vmath.vector3(1, 0, 0) end
 			go.set("#collisionobject", "linear_velocity", vmath.normalize(away) * 600)
-			msg.post(message.checkpoint_url, "reset")  -- allow retry
+			msg.post(message.checkpoint_url, "reset")
+			msg.post("/hud#hud", "show_message", { text = "TOO SLOW! Need speed 700+" })
 		end
 	elseif message_id == hash("checkpoint_hit") then
 		self.checkpoints_hit = (self.checkpoints_hit or 0) + 1

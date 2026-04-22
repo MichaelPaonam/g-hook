@@ -1,4 +1,5 @@
 -- 7-segment digit definitions: top, top-right, bot-right, bottom, bot-left, top-left, middle
+go.property("level_index", 0)
 local W, H, M = 8, 14, 7
 local SEGMENTS = {
 	{0, H,  W, H},   -- 1: top
@@ -80,7 +81,7 @@ end
 
 function init(self)
 	self.checkpoints = {}
-	self.checkpoint_labels = {}  -- {x, y, number} for draw_digit labels
+	self.checkpoint_labels = {}
 	self.finish_url = nil
 	self.finish_pos = nil
 	self.next_checkpoint = 1
@@ -88,6 +89,30 @@ function init(self)
 	self.elapsed = 0
 	self.timer_running = false
 	self.finished = false
+
+	msg.post("/hud#hud", "update_level", { index = self.level_index })
+
+	if self.level_index == 1 then
+		timer.delay(0.5, false, function()
+			msg.post("/hud#hud", "show_message", { text = "AIM with MOUSE   Q to HOOK" })
+			timer.delay(3.0, false, function()
+				msg.post("/hud#hud", "show_message", { text = "E to RELEASE   WASD to steer" })
+				timer.delay(3.0, false, function()
+					msg.post("/hud#hud", "show_message", { text = "Chain hooks for SPEED BONUS!" })
+					timer.delay(3.0, false, function()
+						msg.post("/hud#hud", "show_message", { text = "" })
+					end)
+				end)
+			end)
+		end)
+	elseif self.level_index == 2 then
+		timer.delay(0.5, false, function()
+			msg.post("/hud#hud", "show_message", { text = "Reach SPEED 700 to pass the gate!" })
+			timer.delay(3.5, false, function()
+				msg.post("/hud#hud", "show_message", { text = "" })
+			end)
+		end)
+	end
 end
 
 local FINISH_X, FINISH_Y = 2900, 1700
@@ -142,7 +167,7 @@ function on_message(self, message_id, message, sender)
 
 	elseif message_id == hash("level_end_triggered") then
 		self.timer_running = false
-		msg.post("/level_complete#level_complete_gui", "show_level_complete")
+		msg.post("/level_complete#level_complete_gui", "show_level_complete", { next_level = self.level_index + 1 })
 
 	elseif message_id == hash("finish_triggered") then
 		if self.all_checkpoints_hit then

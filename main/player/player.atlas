@@ -2,13 +2,15 @@ animations {
   id: "idle"
   images {
     image: "/assets/images/player.png"
-    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
   }
   playback: PLAYBACK_NONE
   fps: 1
-  flip_horizontal: 0
-  flip_vertical: 0
 }
-margin: 0
-inner_padding: 0
+animations {
+  id: "target"
+  images {
+    image: "/assets/images/target.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+}
 extrude_borders: 2

@@ -39,6 +39,9 @@ end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("show_level_complete") then
+		if message.next_level then
+			gui.set_text(gui.get_node("next_label"), "Go to Level " .. message.next_level)
+		end
 		show(self)
 	end
 end

@@ -110,6 +110,7 @@ embedded_instances {
   "}\n"
   ""
 }
+
 embedded_instances {
   id: "level_complete"
   data: "components {\n"
