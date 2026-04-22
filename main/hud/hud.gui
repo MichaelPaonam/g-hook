@@ -3,11 +3,13 @@ fonts {
   name: "system_font"
   font: "/builtins/fonts/default.font"
 }
-background_color {
-  x: 0.0
-  y: 0.0
-  z: 0.0
-  w: 0.0
+fonts {
+  name: "passion"
+  font: "/main/passion.font"
+}
+textures {
+  name: "player"
+  texture: "/main/player/player.atlas"
 }
 nodes {
   position {
@@ -22,60 +24,31 @@ nodes {
   text: "00:00.000"
   font: "system_font"
   id: "timer"
-  outline {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  shadow {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
   inherit_alpha: true
-  color {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-    w: 1.0
-  }
-  pivot: PIVOT_CENTER
 }
 nodes {
   position {
     x: 480.0
     y: 596.0
   }
+  scale {
+    x: 0.8
+    y: 0.8
+  }
   size {
     x: 300.0
     y: 24.0
+  }
+  color {
+    x: 0.7
+    y: 0.7
+    z: 0.7
   }
   type: TYPE_TEXT
   text: "BEST: --:--.---"
   font: "system_font"
   id: "best_time"
-  outline {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  shadow {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
   inherit_alpha: true
-  color {
-    x: 0.7
-    y: 0.7
-    z: 0.7
-    w: 1.0
-  }
-  pivot: PIVOT_CENTER
-  scale {
-    x: 0.8
-    y: 0.8
-  }
 }
 nodes {
   position {
@@ -86,64 +59,40 @@ nodes {
     x: 200.0
     y: 24.0
   }
+  color {
+    x: 0.6
+    z: 0.6
+  }
   type: TYPE_TEXT
   text: "SPD: 0"
   font: "system_font"
   id: "speed"
-  outline {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  shadow {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  inherit_alpha: true
-  color {
-    x: 0.6
-    y: 1.0
-    z: 0.6
-    w: 1.0
-  }
   pivot: PIVOT_W
+  inherit_alpha: true
 }
 nodes {
   position {
     x: 20.0
     y: 596.0
   }
+  scale {
+    x: 0.8
+    y: 0.8
+  }
   size {
     x: 200.0
     y: 24.0
+  }
+  color {
+    x: 0.4
+    y: 0.8
   }
   type: TYPE_TEXT
   text: "HOOKS: 0/3"
   font: "system_font"
   id: "cables"
-  outline {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  shadow {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  inherit_alpha: true
-  color {
-    x: 0.4
-    y: 0.8
-    z: 1.0
-    w: 1.0
-  }
   pivot: PIVOT_W
-  scale {
-    x: 0.8
-    y: 0.8
-  }
+  inherit_alpha: true
 }
 nodes {
   position {
@@ -154,62 +103,66 @@ nodes {
     x: 200.0
     y: 24.0
   }
-  type: TYPE_TEXT
-  text: ""
-  font: "system_font"
-  id: "chain"
-  outline {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  shadow {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  inherit_alpha: true
   color {
-    x: 1.0
     y: 0.8
     z: 0.0
-    w: 1.0
   }
+  type: TYPE_TEXT
+  font: "system_font"
+  id: "chain"
   pivot: PIVOT_E
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 940.0
+    y: 596.0
+  }
+  size {
+    x: 200.0
+    y: 24.0
+  }
+  color {
+    x: 0.6
+    y: 0.6
+  }
+  type: TYPE_TEXT
+  font: "system_font"
+  id: "level_label"
+  pivot: PIVOT_E
+  inherit_alpha: true
 }
 nodes {
   position {
     x: 480.0
     y: 400.0
   }
+  scale {
+    x: 1.5
+    y: 1.5
+  }
   size {
     x: 500.0
     y: 48.0
   }
   type: TYPE_TEXT
-  text: ""
-  font: "system_font"
+  font: "passion"
   id: "message"
-  outline {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  shadow {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
   inherit_alpha: true
-  color {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-    w: 1.0
-  }
-  pivot: PIVOT_CENTER
-  scale {
-    x: 1.5
-    y: 1.5
-  }
 }
+nodes {
+  position {
+    x: 0.0
+    y: 0.0
+  }
+  size {
+    x: 32.0
+    y: 32.0
+  }
+  type: TYPE_BOX
+  texture: "player/target"
+  id: "cursor"
+  inherit_alpha: true
+  pivot: PIVOT_CENTER
+}
+material: "/builtins/materials/gui.material"

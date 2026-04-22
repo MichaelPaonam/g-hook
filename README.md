@@ -13,7 +13,6 @@ Fire cables at anchor points and walls, get pulled toward them, chain hooks for 
 | **WASD** | Move (weak steering force; retains momentum after cable release) |
 | **Right-click drag** | Pan camera |
 | **Scroll wheel** | Zoom in / out |
-| **R** | Restart run |
 
 ## How It Works
 
@@ -30,48 +29,54 @@ This is a **top-down** game with **zero gravity**. The mechanic is inspired by F
 
 Up to 3 cables can be active simultaneously. The oldest cable is dropped if a 4th is fired.
 
-## Level
+## Speed Aura
 
-The arena is 3000×2000 pixels arranged as a **S-shaped hallway**:
+When the player exceeds **700 px/s**, an orange glow aura activates around the player. Some checkpoints require this speed to pass — hitting them too slowly knocks the player back.
 
-```
-Start (150, 300)  →  Corridor 1 (y≈300)  →  Turn 1  →
-Corridor 2 (y≈900)  →  Turn 2  →  Corridor 3 (y≈1500)  →  Finish
-```
+## Levels
 
-**Checkpoints must be hit in order** (1 → 2 → 3 → 4). Hitting a checkpoint out of order triggers a 1.5-second penalty and resets the run. The same applies to touching the finish before all checkpoints are cleared.
+| Level | Description |
+|-------|-------------|
+| **Level 1** | Tutorial — learn the controls. Hit the checkpoint to finish. |
+| **Level 2** | Speed gate — the final checkpoint requires speed ≥ 700 to pass. |
+| **Level 3** | Coming soon. |
 
-The timer starts on the first hook fire, stops at the finish, and is displayed near the finish line in world space.
+Checkpoints must be hit in order. Hitting one out of order triggers a 1.5-second penalty and resets the run.
 
 ## Project Structure
 
 ```
-game.project                 # Defold project config (zero gravity, 960x640, HTML5)
-input/game.input_binding     # Q, E, WASD, R, right-click pan, scroll zoom
+game.project                   # Defold project config (zero gravity, 960x640, HTML5)
+input/game.input_binding       # Q, E, WASD, right-click pan, scroll zoom
 render/
-  game.render                # Custom render pipeline
-  game.render_script         # Camera-aware rendering + draw_line for cables/walls/timer
+  game.render_script           # Camera-aware rendering + draw_line for cables/timer
 main/
-  main.collection            # Game world: player, camera, walls, anchors, checkpoints
+  main.collection              # Bootstrap: start screen + level loader (collection proxies)
+  loader/
+    loader.script              # Loads/unloads level collections via proxies
   player/
-    player.script            # Core game logic (movement, pull mechanic, chain, reset)
-    player.atlas             # Player sprite
+    player.script              # Core game logic (movement, pull mechanic, chain, aura)
+    player.atlas               # Player sprite + hook cursor (target animation)
   camera/
-    camera.script            # Smooth follow, velocity lead, right-click pan
+    camera.script              # Smooth follow, velocity lead, right-click pan
   hook/
-    cable_line.script        # (Unused — cables rendered via draw_line in player.script)
-    cable.atlas              # Cable sprite
+    cable.factory              # Spawns cable visuals
   level/
-    level.script             # Checkpoint ordering, finish detection, world-space timer
-    checkpoint.script        # Per-checkpoint trigger and visual feedback
-    anchor.atlas             # Anchor point sprite (48×16 yellow rectangle)
-    level.atlas              # Checkpoint/finish sprites
+    level.script               # Checkpoint ordering, finish detection, tutorial hints
+    checkpoint.script          # Per-checkpoint trigger (supports speed gate mechanic)
   hud/
-    hud.gui                  # HUD layout (speed, chain, cable count, messages)
-    hud.gui_script           # HUD logic + best time persistence (sys.save)
+    hud.gui / hud.gui_script   # HUD: speed, chain, cable count, level label, cursor, messages
+    start_screen.gui           # Start screen with title and Start button
+    level_complete.gui         # Level complete overlay with dynamic "Go to Level N" button
+  fx/
+    speed_aura.particlefx      # Orange particle aura active above speed 700
   util/
-    screen_to_world.lua      # Mouse screen coords → world coords (accounts for zoom)
-assets/images/               # Placeholder PNGs
+    screen_to_world.lua        # Mouse screen coords → world coords (accounts for zoom)
+levels/
+  level_1/                     # Level 1 collection + tilemap
+  level_2/                     # Level 2 collection + tilemaps + anchors
+  level_3/                     # Level 3 shell (empty, ready for content)
+assets/images/                 # Sprites and images
 ```
 
 ## Setup
@@ -92,15 +97,17 @@ assets/images/               # Placeholder PNGs
 
 ### Build for HTML5
 
-1. In Defold Editor: **Project > Bundle > HTML5 Application**.
-2. Choose an output directory.
-3. Test locally (WASM requires HTTP, not file://):
+1. Download `bob.jar` from [Defold releases](https://github.com/defold/defold/releases) and place it in the project root.
+2. Run the build script:
    ```
-   cd <output-directory>
+   ./build.sh
+   ```
+3. Serve the output locally (WASM requires HTTP, not `file://`):
+   ```
+   cd build
    python3 -m http.server 8080
    ```
 4. Open `http://localhost:8080` in Chrome or Firefox.
-5. For itch.io: zip the bundle folder and upload.
 
 ## Tuning
 
@@ -120,6 +127,7 @@ All physics constants are at the top of `main/player/player.script`:
 | `CHAIN_BONUS` | 0.20 | Pull multiplier per chain level (+20%) |
 | `HOOK_MAX_RANGE` | 1200 | Max raycast distance (px) |
 | `AUTO_RELEASE_DIST` | 120 | Distance at which cable auto-releases |
+| `AURA_SPEED_THRESHOLD` | 700 | Speed required to trigger aura and pass speed gates |
 
 ## License
 

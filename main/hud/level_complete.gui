@@ -1,0 +1,72 @@
+script: "/main/hud/level_complete.gui_script"
+fonts {
+  name: "system_font"
+  font: "/builtins/fonts/default.font"
+}
+fonts {
+  name: "open_sans"
+  font: "/main/open_sans.font"
+}
+fonts {
+  name: "passion"
+  font: "/main/passion.font"
+}
+textures {
+  name: "button"
+  texture: "/main/button.atlas"
+}
+nodes {
+  position {
+    x: 480.0
+    y: 400.0
+  }
+  size {
+    x: 400.0
+    y: 60.0
+  }
+  color {
+    y: 0.9
+    z: 0.2
+  }
+  type: TYPE_TEXT
+  text: "You Won!"
+  font: "open_sans"
+  id: "title"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 480.0
+    y: 280.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_BOX
+  texture: "button/green"
+  id: "next_btn"
+  inherit_alpha: true
+  slice9 {
+    x: 40.0
+    y: 40.0
+    z: 40.0
+    w: 40.0
+  }
+}
+nodes {
+  position {
+    x: 480.0
+    y: 280.0
+  }
+  size {
+    x: 240.0
+    y: 60.0
+  }
+  type: TYPE_TEXT
+  text: "Go to Level 2"
+  font: "passion"
+  id: "next_label"
+  inherit_alpha: true
+}
+material: "/builtins/materials/gui.material"

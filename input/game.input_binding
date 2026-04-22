@@ -15,16 +15,16 @@ key_trigger {
   action: "move_right"
 }
 key_trigger {
-  input: KEY_R
-  action: "restart"
-}
-key_trigger {
   input: KEY_Q
   action: "fire_hook"
 }
 key_trigger {
   input: KEY_E
   action: "release_hooks"
+}
+mouse_trigger {
+  input: MOUSE_BUTTON_1
+  action: "click"
 }
 mouse_trigger {
   input: MOUSE_BUTTON_2
