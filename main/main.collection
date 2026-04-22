@@ -81,8 +81,9 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: 150.0
-    y: 300.0
+    x: 179.0
+    y: 337.0
+    z: 166.0
   }
 }
 embedded_instances {
@@ -1331,4 +1332,18 @@ embedded_instances {
     x: 3.0
     y: 3.0
   }
+}
+embedded_instances {
+  id: "loader"
+  data: "components {\n"
+  "  id: \"loader\"\n"
+  "  component: \"/main/loader/loader.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"proxy_level_1\"\n"
+  "  type: \"collectionproxy\"\n"
+  "  data: \"collection: \\\"\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
 }
