@@ -1,5 +1,3 @@
-local wavedash = require("main.wavedash")
-
 local DISPLAY_W = 960
 local DISPLAY_H = 640
 
@@ -38,9 +36,6 @@ function init(self)
 	else
 		gui.set_text(self.best_time_node, "BEST: --:--.---")
 	end
-
-	wavedash.update_load_progress(1)
-	wavedash.init()
 end
 
 function format_time(t)
