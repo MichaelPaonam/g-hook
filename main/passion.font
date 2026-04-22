@@ -1,0 +1,4 @@
+font: "/assets/fonts/passion_one/PassionOne-Regular.ttf"
+material: "/builtins/fonts/font.material"
+size: 25
+characters: " !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"

@@ -1,6 +1,7 @@
 [project]
 title = G-Hook
 version = 1.0
+developer = 0xpaona
 
 [bootstrap]
 main_collection = /main/main.collectionc
@@ -33,3 +34,4 @@ scale_mode = fit
 [graphics]
 default_texture_min_filter = nearest
 default_texture_mag_filter = nearest
+

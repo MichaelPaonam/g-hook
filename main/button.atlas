@@ -1,0 +1,22 @@
+animations {
+  id: "red"
+  images {
+    image: "/assets/images/red.png"
+  }
+  playback: PLAYBACK_NONE
+}
+animations {
+  id: "green"
+  images {
+    image: "/assets/images/green.png"
+  }
+  playback: PLAYBACK_NONE
+}
+animations {
+  id: "yellow"
+  images {
+    image: "/assets/images/yellow.png"
+  }
+  playback: PLAYBACK_NONE
+}
+extrude_borders: 2

@@ -1,12 +1,32 @@
-local wavedash = require("main.wavedash")
+local DISPLAY_W = 960
+local DISPLAY_H = 640
+
+local function reposition(node_id, x, y)
+	local w = gui.get_width()
+	local h = gui.get_height()
+	local sx = w / DISPLAY_W
+	local sy = h / DISPLAY_H
+	gui.set_position(gui.get_node(node_id), vmath.vector3(x * sx, y * sy, 0))
+end
 
 function init(self)
+	msg.post(".", "acquire_input_focus")
 	self.timer_node = gui.get_node("timer")
 	self.best_time_node = gui.get_node("best_time")
 	self.chain_node = gui.get_node("chain")
 	self.speed_node = gui.get_node("speed")
 	self.cables_node = gui.get_node("cables")
 	self.message_node = gui.get_node("message")
+	self.level_label_node = gui.get_node("level_label")
+	self.cursor_node = gui.get_node("cursor")
+
+	reposition("timer",       480, 620)
+	reposition("best_time",   480, 596)
+	reposition("speed",        20, 620)
+	reposition("cables",       20, 596)
+	reposition("chain",       940, 620)
+	reposition("level_label", 940, 596)
+	reposition("message",     480, 400)
 
 	gui.set_text(self.message_node, "")
 
@@ -16,9 +36,6 @@ function init(self)
 	else
 		gui.set_text(self.best_time_node, "BEST: --:--.---")
 	end
-
-	wavedash.update_load_progress(1)
-	wavedash.init()
 end
 
 function format_time(t)
@@ -34,6 +51,12 @@ end
 
 function save_best_time(t)
 	sys.save("g_hook_save", { best_time = t })
+end
+
+function on_input(self, action_id, action)
+	if not action_id then
+		gui.set_position(self.cursor_node, vmath.vector3(action.x, action.y, 0))
+	end
 end
 
 function on_message(self, message_id, message, sender)
@@ -82,9 +105,22 @@ function on_message(self, message_id, message, sender)
 			gui.set_color(self.message_node, vmath.vector4(1, 1, 1, 1))
 		end
 
+	elseif message_id == hash("update_level") then
+		if message.index and message.index > 0 then
+			gui.set_text(self.level_label_node, "LEVEL " .. message.index)
+		end
+
 	elseif message_id == hash("show_message") then
 		gui.set_text(self.message_node, message.text)
 		gui.set_color(self.message_node, vmath.vector4(1, 0.2, 0.2, 1))
+		if message.text ~= "" then
+			local snapshot = message.text
+			timer.delay(2.5, false, function()
+				if gui.get_text(self.message_node) == snapshot then
+					gui.set_text(self.message_node, "")
+				end
+			end)
+		end
 
 	elseif message_id == hash("reset") then
 		gui.set_text(self.timer_node, "00:00.000")

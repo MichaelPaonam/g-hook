@@ -34,6 +34,7 @@ function update(self)
 	local window_h = render.get_window_height()
 	if window_w == 0 or window_h == 0 then return end
 
+
 	local viewport_x, viewport_y, viewport_w, viewport_h = fit_viewport(window_w, window_h)
 
 	render.set_viewport(viewport_x, viewport_y, viewport_w, viewport_h)
@@ -58,8 +59,10 @@ function update(self)
 	render.draw(self.particle_pred)
 	render.draw_debug3d()
 
+	-- GUI pass: use actual window dimensions as coordinate space (matches Defold default)
 	render.set_view(vmath.matrix4())
-	render.set_projection(vmath.matrix4_orthographic(0, DISPLAY_WIDTH, 0, DISPLAY_HEIGHT, -1, 1))
+	render.set_projection(vmath.matrix4_orthographic(0, window_w, 0, window_h, -1, 1))
+	render.set_viewport(0, 0, window_w, window_h)
 	render.enable_state(render.STATE_STENCIL_TEST)
 	render.draw(self.gui_pred)
 	render.draw(self.text_pred)

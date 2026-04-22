@@ -1,33 +1,5 @@
--- Wall definitions: {cx, cy, half_w, half_h}
-local WALLS = {
-	-- boundary walls
-	{1500, 0,    1500, 8},
-	{1500, 2000, 1500, 8},
-	{0,    1000, 8,    1000},
-	{3000, 1000, 8,    1000},
-	-- Seg1 corridor walls (y_center=300)
-	{550,  450,  450,  8},   -- top
-	{550,  150,  450,  8},   -- bottom
-	-- Turn1 walls
-	{900,  600,  8,    150},
-	{1050, 600,  8,    150},
-	-- Seg2 corridor walls (y_center=900)
-	{1600, 1050, 550,  8},   -- top
-	{1600, 750,  550,  8},   -- bottom
-	-- Turn2 wall
-	{2150, 1200, 8,    150},
-}
-local WALL_TEXTURE_SIZE = 32
-
--- Checkpoint positions for drawing labels: {x, y, number}
-local CHECKPOINTS = {
-	{950,  300,  1},
-	{1100, 900,  2},
-	{2100, 900,  3},
-	{2500, 1500, 4},
-}
-
 -- 7-segment digit definitions: top, top-right, bot-right, bottom, bot-left, top-left, middle
+go.property("level_index", 0)
 local W, H, M = 8, 14, 7
 local SEGMENTS = {
 	{0, H,  W, H},   -- 1: top
@@ -109,23 +81,37 @@ end
 
 function init(self)
 	self.checkpoints = {}
+	self.checkpoint_labels = {}
 	self.finish_url = nil
+	self.finish_pos = nil
 	self.next_checkpoint = 1
 	self.all_checkpoints_hit = false
 	self.elapsed = 0
 	self.timer_running = false
 	self.finished = false
-	self.wall_visuals = {}
 
-	for _, w in ipairs(WALLS) do
-		local cx, cy, hw, hh = w[1], w[2], w[3], w[4]
-		local wall_id = factory.create("#wall_factory", vmath.vector3(cx, cy, 0.01))
-		go.set_scale(vmath.vector3(
-			(hw * 2) / WALL_TEXTURE_SIZE,
-			(hh * 2) / WALL_TEXTURE_SIZE,
-			1
-		), wall_id)
-		table.insert(self.wall_visuals, wall_id)
+	msg.post("/hud#hud", "update_level", { index = self.level_index })
+
+	if self.level_index == 1 then
+		timer.delay(0.5, false, function()
+			msg.post("/hud#hud", "show_message", { text = "AIM with MOUSE   Q to HOOK" })
+			timer.delay(3.0, false, function()
+				msg.post("/hud#hud", "show_message", { text = "E to RELEASE   WASD to steer" })
+				timer.delay(3.0, false, function()
+					msg.post("/hud#hud", "show_message", { text = "Chain hooks for SPEED BONUS!" })
+					timer.delay(3.0, false, function()
+						msg.post("/hud#hud", "show_message", { text = "" })
+					end)
+				end)
+			end)
+		end)
+	elseif self.level_index == 2 then
+		timer.delay(0.5, false, function()
+			msg.post("/hud#hud", "show_message", { text = "Reach SPEED 700 to pass the gate!" })
+			timer.delay(3.5, false, function()
+				msg.post("/hud#hud", "show_message", { text = "" })
+			end)
+		end)
 	end
 end
 
@@ -136,35 +122,32 @@ function update(self, dt)
 		self.elapsed = self.elapsed + dt
 	end
 
-	-- draw sequence numbers above each checkpoint
-	for _, cp in ipairs(CHECKPOINTS) do
+	-- draw sequence numbers above each registered checkpoint
+	for _, cp in ipairs(self.checkpoint_labels) do
 		draw_digit(cp[3], cp[1], cp[2] + 50, LABEL_COLOR)
 	end
 
-	-- draw timer above finish line
-	draw_timer(self.elapsed, FINISH_X, FINISH_Y + 40, TIMER_COLOR)
-
-	-- draw "F" indicator just above finish box
-	local fx, fy = FINISH_X, FINISH_Y + 22
-	msg.post("@render:", "draw_line", { start_point = vmath.vector3(fx-10, fy,    0), end_point = vmath.vector3(fx+10, fy,    0), color = FINISH_COLOR })
-	msg.post("@render:", "draw_line", { start_point = vmath.vector3(fx-10, fy,    0), end_point = vmath.vector3(fx-10, fy-24, 0), color = FINISH_COLOR })
-	msg.post("@render:", "draw_line", { start_point = vmath.vector3(fx-10, fy-12, 0), end_point = vmath.vector3(fx+5,  fy-12, 0), color = FINISH_COLOR })
-end
-
-function final(self)
-	for _, wall_id in ipairs(self.wall_visuals or {}) do
-		go.delete(wall_id, true)
-	end
-	self.wall_visuals = {}
+	-- draw timer and finish marker above finish line (if finish is registered)
+	local fx = self.finish_pos and self.finish_pos.x or FINISH_X
+	local fy = self.finish_pos and self.finish_pos.y or FINISH_Y
+	draw_timer(self.elapsed, fx, fy + 40, TIMER_COLOR)
+	msg.post("@render:", "draw_line", { start_point = vmath.vector3(fx-10, fy+22,    0), end_point = vmath.vector3(fx+10, fy+22,    0), color = FINISH_COLOR })
+	msg.post("@render:", "draw_line", { start_point = vmath.vector3(fx-10, fy+22,    0), end_point = vmath.vector3(fx-10, fy-2,  0), color = FINISH_COLOR })
+	msg.post("@render:", "draw_line", { start_point = vmath.vector3(fx-10, fy+10, 0), end_point = vmath.vector3(fx+5,  fy+10, 0), color = FINISH_COLOR })
 end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("register_checkpoint") then
 		table.insert(self.checkpoints, { id = message.id, url = sender })
 		table.sort(self.checkpoints, function(a, b) return a.id < b.id end)
+		-- record position for label drawing
+		local pos = go.get_position(sender)
+		table.insert(self.checkpoint_labels, { pos.x, pos.y, message.id })
+		table.sort(self.checkpoint_labels, function(a, b) return a[3] < b[3] end)
 
 	elseif message_id == hash("register_finish") then
 		self.finish_url = message.url
+		self.finish_pos = go.get_position(sender)
 
 	elseif message_id == hash("checkpoint_triggered") then
 		if self.all_checkpoints_hit then return end
@@ -181,6 +164,10 @@ function on_message(self, message_id, message, sender)
 			-- wrong order — game over, reset
 			msg.post("/player#player", "wrong_checkpoint")
 		end
+
+	elseif message_id == hash("level_end_triggered") then
+		self.timer_running = false
+		msg.post("/level_complete#level_complete_gui", "show_level_complete", { next_level = self.level_index + 1 })
 
 	elseif message_id == hash("finish_triggered") then
 		if self.all_checkpoints_hit then

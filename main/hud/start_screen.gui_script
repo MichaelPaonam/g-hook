@@ -1,0 +1,43 @@
+local wavedash = require("main.wavedash")
+
+local DISPLAY_W = 960
+local DISPLAY_H = 640
+
+local function reposition(node_id, x, y)
+	local w = gui.get_width()
+	local h = gui.get_height()
+	gui.set_position(gui.get_node(node_id), vmath.vector3(x * w / DISPLAY_W, y * h / DISPLAY_H, 0))
+end
+
+local function set_visible(visible)
+	gui.set_enabled(gui.get_node("title"), visible)
+	gui.set_enabled(gui.get_node("start_btn"), visible)
+	gui.set_enabled(gui.get_node("start_label"), visible)
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	reposition("title",       480, 400)
+	reposition("start_btn",   480, 280)
+	reposition("start_label", 480, 280)
+	wavedash.update_load_progress(1)
+	wavedash.init()
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("click") and action.released then
+		if gui.pick_node(gui.get_node("start_btn"), action.x, action.y) then
+			msg.post("/loader#loader", "load_level", { level = 1 })
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("hide_start_screen") then
+		set_visible(false)
+		msg.post(".", "release_input_focus")
+	elseif message_id == hash("show_start_screen") then
+		set_visible(true)
+		msg.post(".", "acquire_input_focus")
+	end
+end
