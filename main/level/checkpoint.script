@@ -1,9 +1,13 @@
 go.property("checkpoint_id", 0)
 go.property("is_finish", false)
+go.property("is_level_end", false)
+go.property("requires_speed", false)
 
 function init(self)
 	self.hit = false
-	if not self.is_finish then
+	if self.is_level_end then
+		msg.post("/level#level_script", "register_level_end", { url = msg.url() })
+	elseif not self.is_finish then
 		msg.post("/level#level_script", "register_checkpoint", { id = self.checkpoint_id })
 	else
 		msg.post("/level#level_script", "register_finish", { url = msg.url() })
@@ -13,17 +17,23 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == hash("trigger_response") then
 		if message.other_group == hash("player") and not self.hit then
-			self.hit = true
-			if self.is_finish then
-				msg.post("/level#level_script", "finish_triggered")
+			if self.is_level_end and self.requires_speed then
+				self.hit = true  -- lock immediately to prevent repeat triggers
+				msg.post("/player#player", "speed_check_level_end", { checkpoint_url = msg.url() })
 			else
-				msg.post("/level#level_script", "checkpoint_triggered", { id = self.checkpoint_id })
+				self.hit = true
+				if self.is_level_end then
+					msg.post("/level#level_script", "level_end_triggered")
+				elseif self.is_finish then
+					msg.post("/level#level_script", "finish_triggered")
+				else
+					msg.post("/level#level_script", "checkpoint_triggered", { id = self.checkpoint_id })
+				end
 			end
-			local tint = self.is_finish and vmath.vector4(0.5, 0.5, 0.5, 1) or vmath.vector4(1, 0.6, 0, 1)
-			sprite.set_constant("#sprite", "tint", tint)
 		end
 	elseif message_id == hash("reset") then
 		self.hit = false
-		sprite.set_constant("#sprite", "tint", vmath.vector4(1, 1, 1, 1))
+	elseif message_id == hash("lock_hit") then
+		self.hit = true
 	end
 end

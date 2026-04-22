@@ -1,0 +1,64 @@
+script: "/main/hud/start_screen.gui_script"
+fonts {
+  name: "system_font"
+  font: "/builtins/fonts/default.font"
+}
+fonts {
+  name: "passion"
+  font: "/main/passion.font"
+}
+textures {
+  name: "button"
+  texture: "/main/button.atlas"
+}
+nodes {
+  position {
+    x: 480.0
+    y: 400.0
+  }
+  size {
+    x: 300.0
+    y: 36.0
+  }
+  type: TYPE_TEXT
+  text: "G-HOOK"
+  font: "passion"
+  id: "title"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 480.0
+    y: 280.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_BOX
+  texture: "button/red"
+  id: "start_btn"
+  inherit_alpha: true
+  slice9 {
+    x: 40.0
+    y: 40.0
+    z: 40.0
+    w: 40.0
+  }
+}
+nodes {
+  position {
+    x: 480.0
+    y: 280.0
+  }
+  size {
+    x: 200.0
+    y: 60.0
+  }
+  type: TYPE_TEXT
+  text: "START"
+  font: "passion"
+  id: "start_label"
+  inherit_alpha: true
+}
+material: "/builtins/materials/gui.material"

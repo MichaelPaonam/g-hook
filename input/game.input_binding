@@ -27,6 +27,10 @@ key_trigger {
   action: "release_hooks"
 }
 mouse_trigger {
+  input: MOUSE_BUTTON_1
+  action: "click"
+}
+mouse_trigger {
   input: MOUSE_BUTTON_2
   action: "pan_camera"
 }

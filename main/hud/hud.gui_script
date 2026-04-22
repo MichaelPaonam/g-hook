@@ -1,5 +1,16 @@
 local wavedash = require("main.wavedash")
 
+local DISPLAY_W = 960
+local DISPLAY_H = 640
+
+local function reposition(node_id, x, y)
+	local w = gui.get_width()
+	local h = gui.get_height()
+	local sx = w / DISPLAY_W
+	local sy = h / DISPLAY_H
+	gui.set_position(gui.get_node(node_id), vmath.vector3(x * sx, y * sy, 0))
+end
+
 function init(self)
 	self.timer_node = gui.get_node("timer")
 	self.best_time_node = gui.get_node("best_time")
@@ -7,6 +18,13 @@ function init(self)
 	self.speed_node = gui.get_node("speed")
 	self.cables_node = gui.get_node("cables")
 	self.message_node = gui.get_node("message")
+
+	reposition("timer",     480, 620)
+	reposition("best_time", 480, 596)
+	reposition("speed",      20, 620)
+	reposition("cables",     20, 596)
+	reposition("chain",     940, 620)
+	reposition("message",   480, 400)
 
 	gui.set_text(self.message_node, "")
 
