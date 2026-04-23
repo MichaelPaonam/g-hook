@@ -22,6 +22,14 @@ key_trigger {
   input: KEY_E
   action: "release_hooks"
 }
+key_trigger {
+  input: KEY_SPACE
+  action: "key_space"
+}
+key_trigger {
+  input: KEY_ESC
+  action: "key_escape"
+}
 mouse_trigger {
   input: MOUSE_BUTTON_1
   action: "click"

@@ -32,5 +32,9 @@ embedded_instances {
   "  id: \"start_screen_gui\"\n"
   "  component: \"/main/hud/start_screen.gui\"\n"
   "}\n"
+  "components {\n"
+  "  id: \"music\"\n"
+  "  component: \"/assets/bg-track/main_theme.sound\"\n"
+  "}\n"
   ""
 }

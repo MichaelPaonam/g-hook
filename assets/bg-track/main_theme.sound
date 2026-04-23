@@ -1,0 +1,4 @@
+sound: "/assets/bg-track/main-theme.wav"
+looping: 1
+group: "music"
+gain: 0.7

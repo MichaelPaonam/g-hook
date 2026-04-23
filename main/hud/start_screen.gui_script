@@ -1,43 +1,240 @@
 local wavedash = require("main.wavedash")
 
-local DISPLAY_W = 960
-local DISPLAY_H = 640
+local STATE_SPLASH   = "splash"
+local STATE_MENU     = "menu"
+local STATE_CONTROLS = "controls"
 
-local function reposition(node_id, x, y)
-	local w = gui.get_width()
-	local h = gui.get_height()
-	gui.set_position(gui.get_node(node_id), vmath.vector3(x * w / DISPLAY_W, y * h / DISPLAY_H, 0))
+local SPLASH_NODES   = { "splash_bg", "splash_title", "splash_prompt" }
+local MENU_NODES     = { "menu_bg", "menu_panel",
+                         "btn_play", "btn_play_accent", "btn_play_label", "btn_play_sub",
+                         "btn_levels", "btn_levels_accent", "btn_levels_label", "btn_levels_sub",
+                         "btn_controls", "btn_controls_accent", "btn_controls_label", "btn_controls_sub" }
+local CONTROLS_NODES = { "controls_dim", "controls_panel", "controls_title",
+                         "controls_text", "controls_close_hint" }
+
+local BUTTONS = {
+	{ id = "btn_play",     label = "btn_play_label",     normal = vmath.vector4(0.14,0.09,0.03,1), hover = vmath.vector4(0.28,0.18,0.05,1) },
+	{ id = "btn_levels",   label = "btn_levels_label",   normal = vmath.vector4(0.07,0.10,0.16,1), hover = vmath.vector4(0.13,0.19,0.30,1) },
+	{ id = "btn_controls", label = "btn_controls_label", normal = vmath.vector4(0.09,0.10,0.14,1), hover = vmath.vector4(0.16,0.18,0.25,1) },
+}
+
+local function nd(id) return gui.get_node(id) end
+
+local function set_group_enabled(ids, enabled)
+	for _, id in ipairs(ids) do
+		gui.set_enabled(nd(id), enabled)
+	end
 end
 
-local function set_visible(visible)
-	gui.set_enabled(gui.get_node("title"), visible)
-	gui.set_enabled(gui.get_node("start_btn"), visible)
-	gui.set_enabled(gui.get_node("start_label"), visible)
+local function show_all(ids)
+	for _, id in ipairs(ids) do
+		gui.set_enabled(nd(id), true)
+		gui.set_alpha(nd(id), 1)
+	end
 end
+
+local function hide_all(ids)
+	for _, id in ipairs(ids) do
+		gui.set_enabled(nd(id), false)
+		gui.set_alpha(nd(id), 0)
+	end
+end
+
+local function pick(id, x, y)
+	local node = gui.get_node(id)
+	return gui.is_enabled(node) and gui.pick_node(node, x, y)
+end
+
+-- ─── SHOW SPLASH ──────────────────────────────────────────────────────────────
+
+local function show_splash(self)
+	self.state = STATE_SPLASH
+	self.transitioning = false
+	self.blink_t = 0
+	self.blink_on = true
+
+	hide_all(MENU_NODES)
+	hide_all(CONTROLS_NODES)
+
+	-- show splash nodes immediately at full alpha
+	for _, id in ipairs(SPLASH_NODES) do
+		gui.set_enabled(nd(id), true)
+		gui.set_alpha(nd(id), 1)
+	end
+	gui.set_enabled(nd("fade_overlay"), true)
+	gui.set_alpha(nd("fade_overlay"), 0)
+end
+
+-- ─── SPLASH → MENU ────────────────────────────────────────────────────────────
+
+local function go_to_menu(self)
+	if self.transitioning then return end
+	self.transitioning = true
+	self.fade_t = 0
+	self.fade_phase = 1  -- fade to black, then show menu, then fade back in (phase 2)
+end
+
+-- ─── CONTROLS ─────────────────────────────────────────────────────────────────
+
+local function open_controls(self)
+	self.state = STATE_CONTROLS
+	for _, id in ipairs(CONTROLS_NODES) do
+		gui.set_enabled(nd(id), true)
+		gui.set_alpha(nd(id), id == "controls_dim" and 0.75 or 1)
+	end
+end
+
+local function close_controls(self)
+	hide_all(CONTROLS_NODES)
+	self.state = STATE_MENU
+end
+
+-- ─── LAUNCH LEVEL ─────────────────────────────────────────────────────────────
+
+local function launch_level(self, level)
+	if self.transitioning then return end
+	self.transitioning = true
+	self.fade_t = 0
+	self.fade_phase = 4  -- fade to black then load level
+	self.pending_level = level
+end
+
+-- ─── LIFECYCLE ────────────────────────────────────────────────────────────────
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
-	reposition("title",       480, 400)
-	reposition("start_btn",   480, 280)
-	reposition("start_label", 480, 280)
+	self.state = STATE_SPLASH
+	self.transitioning = false
+	self.fade_t = 0
+	self.fade_dir = 0
+	self.fade_phase = 0
+	self.pending_level = 0
+	self.blink_t = 0
+	self.blink_on = true
+
 	wavedash.update_load_progress(1)
 	wavedash.init()
+
+	msg.post("/start_screen#music", "play_sound", { delay = 0, gain = 0.7 })
+	show_splash(self)
+end
+
+function update(self, dt)
+	-- prompt blink
+	if self.state == STATE_SPLASH then
+		self.blink_t = self.blink_t + dt
+		if self.blink_t >= 0.6 then
+			self.blink_t = 0
+			self.blink_on = not self.blink_on
+			gui.set_alpha(nd("splash_prompt"), self.blink_on and 1 or 0.2)
+		end
+	end
+
+	-- fade transition
+	if not self.transitioning then return end
+
+	local FADE_SPEED = 3.0
+	self.fade_t = self.fade_t + dt * FADE_SPEED
+
+	if self.fade_phase == 1 or self.fade_phase == 4 then
+		-- fading TO black
+		local a = math.min(self.fade_t, 1)
+		gui.set_alpha(nd("fade_overlay"), a)
+		if a >= 1 then
+			if self.fade_phase == 1 then
+				-- splash → menu
+				hide_all(SPLASH_NODES)
+				show_all(MENU_NODES)
+				self.state = STATE_MENU
+				self.fade_t = 0
+				self.fade_phase = 2
+			else
+				-- launch level
+				self.transitioning = false
+				self.fade_phase = 0
+				msg.post("/start_screen#music", "stop_sound")
+				msg.post("/loader#loader", "load_level", { level = self.pending_level })
+			end
+		end
+
+	elseif self.fade_phase == 2 then
+		-- fading FROM black (menu appearing)
+		local b = math.max(1 - self.fade_t, 0)
+		gui.set_alpha(nd("fade_overlay"), b)
+		if b <= 0 then
+			gui.set_alpha(nd("fade_overlay"), 0)
+			self.transitioning = false
+			self.fade_phase = 0
+		end
+	end
 end
 
 function on_input(self, action_id, action)
-	if action_id == hash("click") and action.released then
-		if gui.pick_node(gui.get_node("start_btn"), action.x, action.y) then
-			msg.post("/loader#loader", "load_level", { level = 1 })
+	if self.state == STATE_SPLASH then
+		if action_id == hash("key_space") and action.released then
+			go_to_menu(self)
+		end
+		return
+	end
+
+	if self.state == STATE_CONTROLS then
+		if action_id == hash("key_escape") and action.released then
+			close_controls(self)
+		elseif action_id == hash("click") and action.released then
+			if not pick("controls_panel", action.x, action.y) then
+				close_controls(self)
+			end
+		end
+		return
+	end
+
+	if self.state == STATE_MENU then
+		if not action_id then
+			for _, btn in ipairs(BUTTONS) do
+				local hovered = gui.pick_node(nd(btn.id), action.x, action.y)
+				gui.animate(nd(btn.id), gui.PROP_COLOR, hovered and btn.hover or btn.normal, gui.EASING_LINEAR, 0.1)
+				if hovered then
+					gui.animate(nd(btn.label), gui.PROP_COLOR, vmath.vector4(1,1,1,1), gui.EASING_LINEAR, 0.1)
+				else
+					local c = gui.get_color(nd(btn.label))
+					gui.animate(nd(btn.label), gui.PROP_COLOR, vmath.vector4(c.x,c.y,c.z,1), gui.EASING_LINEAR, 0.1)
+				end
+			end
+		end
+
+		if action_id == hash("click") then
+			if action.pressed then
+				for _, btn in ipairs(BUTTONS) do
+					if pick(btn.id, action.x, action.y) then
+						gui.animate(nd(btn.id), gui.PROP_SCALE, vmath.vector3(0.97,0.97,1), gui.EASING_OUTQUAD, 0.08)
+					end
+				end
+			elseif action.released then
+				for _, btn in ipairs(BUTTONS) do
+					gui.animate(nd(btn.id), gui.PROP_SCALE, vmath.vector3(1,1,1), gui.EASING_OUTBACK, 0.12)
+				end
+				if pick("btn_play", action.x, action.y) then
+					launch_level(self, 1)
+				elseif pick("btn_levels", action.x, action.y) then
+					launch_level(self, 1)
+				elseif pick("btn_controls", action.x, action.y) then
+					open_controls(self)
+				end
+			end
 		end
 	end
 end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("hide_start_screen") then
-		set_visible(false)
+		hide_all(SPLASH_NODES)
+		hide_all(MENU_NODES)
+		hide_all(CONTROLS_NODES)
+		gui.set_alpha(nd("fade_overlay"), 0)
+		gui.set_enabled(nd("fade_overlay"), false)
 		msg.post(".", "release_input_focus")
 	elseif message_id == hash("show_start_screen") then
-		set_visible(true)
+		show_splash(self)
 		msg.post(".", "acquire_input_focus")
 	end
 end
