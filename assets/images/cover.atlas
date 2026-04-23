@@ -2,5 +2,5 @@ images {
   image: "/assets/images/cover.png"
 }
 images {
-  image: "/splash.png"
+  image: "/assets/images/splash.png"
 }

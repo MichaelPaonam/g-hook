@@ -1,4 +1,4 @@
-sound: "/assets/bg-track/7.wav"
+sound: "/assets/bg-track/level_music.wav"
 looping: 1
 group: "music"
 gain: 0.7
