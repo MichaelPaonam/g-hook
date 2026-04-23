@@ -1,5 +1,6 @@
 -- 7-segment digit definitions: top, top-right, bot-right, bottom, bot-left, top-left, middle
 go.property("level_index", 0)
+local settings = require("main.util.settings")
 local W, H, M = 8, 14, 7
 local SEGMENTS = {
 	{0, H,  W, H},   -- 1: top
@@ -91,6 +92,9 @@ function init(self)
 	self.finished = false
 
 	msg.post("/hud#hud", "update_level", { index = self.level_index })
+	local s = settings.load()
+	local gain = s.music_muted and 0 or s.music_volume
+	msg.post("/music#music", "play_sound", { delay = 0, gain = gain })
 
 	if self.level_index == 1 then
 		timer.delay(0.5, false, function()
@@ -121,19 +125,6 @@ function update(self, dt)
 	if self.timer_running then
 		self.elapsed = self.elapsed + dt
 	end
-
-	-- draw sequence numbers above each registered checkpoint
-	for _, cp in ipairs(self.checkpoint_labels) do
-		draw_digit(cp[3], cp[1], cp[2] + 50, LABEL_COLOR)
-	end
-
-	-- draw timer and finish marker above finish line (if finish is registered)
-	local fx = self.finish_pos and self.finish_pos.x or FINISH_X
-	local fy = self.finish_pos and self.finish_pos.y or FINISH_Y
-	draw_timer(self.elapsed, fx, fy + 40, TIMER_COLOR)
-	msg.post("@render:", "draw_line", { start_point = vmath.vector3(fx-10, fy+22,    0), end_point = vmath.vector3(fx+10, fy+22,    0), color = FINISH_COLOR })
-	msg.post("@render:", "draw_line", { start_point = vmath.vector3(fx-10, fy+22,    0), end_point = vmath.vector3(fx-10, fy-2,  0), color = FINISH_COLOR })
-	msg.post("@render:", "draw_line", { start_point = vmath.vector3(fx-10, fy+10, 0), end_point = vmath.vector3(fx+5,  fy+10, 0), color = FINISH_COLOR })
 end
 
 function on_message(self, message_id, message, sender)
@@ -167,6 +158,7 @@ function on_message(self, message_id, message, sender)
 
 	elseif message_id == hash("level_end_triggered") then
 		self.timer_running = false
+		msg.post("/player#player", "finish_hit")
 		msg.post("/level_complete#level_complete_gui", "show_level_complete", { next_level = self.level_index + 1 })
 
 	elseif message_id == hash("finish_triggered") then

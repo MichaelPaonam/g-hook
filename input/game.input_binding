@@ -23,6 +23,10 @@ key_trigger {
   action: "release_hooks"
 }
 key_trigger {
+  input: KEY_R
+  action: "restart"
+}
+key_trigger {
   input: KEY_SPACE
   action: "key_space"
 }

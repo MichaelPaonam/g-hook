@@ -1,8 +1,10 @@
 local wavedash = require("main.wavedash")
+local settings  = require("main.util.settings")
 
 local STATE_SPLASH   = "splash"
 local STATE_MENU     = "menu"
 local STATE_CONTROLS = "controls"
+local STATE_SETTINGS = "settings"
 
 local SPLASH_NODES   = { "splash_bg", "splash_title", "splash_prompt" }
 local MENU_NODES     = { "menu_bg", "menu_panel",
@@ -11,6 +13,9 @@ local MENU_NODES     = { "menu_bg", "menu_panel",
                          "btn_controls", "btn_controls_accent", "btn_controls_label", "btn_controls_sub" }
 local CONTROLS_NODES = { "controls_dim", "controls_panel", "controls_title",
                          "controls_text", "controls_close_hint" }
+local SETTINGS_NODES = { "settings_dim", "settings_panel", "settings_title",
+                         "vol_label", "vol_track", "vol_fill", "vol_handle", "vol_pct",
+                         "toggle_track", "toggle_knob", "toggle_label", "settings_hint" }
 
 local BUTTONS = {
 	{ id = "btn_play",     label = "btn_play_label",     normal = vmath.vector4(0.14,0.09,0.03,1), hover = vmath.vector4(0.28,0.18,0.05,1) },
@@ -18,13 +23,10 @@ local BUTTONS = {
 	{ id = "btn_controls", label = "btn_controls_label", normal = vmath.vector4(0.09,0.10,0.14,1), hover = vmath.vector4(0.16,0.18,0.25,1) },
 }
 
-local function nd(id) return gui.get_node(id) end
+local TRACK_W    = 200
+local TRACK_LEFT = 380
 
-local function set_group_enabled(ids, enabled)
-	for _, id in ipairs(ids) do
-		gui.set_enabled(nd(id), enabled)
-	end
-end
+local function nd(id) return gui.get_node(id) end
 
 local function show_all(ids)
 	for _, id in ipairs(ids) do
@@ -45,6 +47,50 @@ local function pick(id, x, y)
 	return gui.is_enabled(node) and gui.pick_node(node, x, y)
 end
 
+-- ─── SETTINGS ────────────────────────────────────────────────────────────────
+
+local function update_toggle_visuals(self)
+	local muted = self.music_muted
+	local knob_x = muted and 413 or 451
+	gui.animate(nd("toggle_knob"),  gui.PROP_POSITION, vmath.vector3(knob_x, 291, 0), gui.EASING_OUTQUAD, 0.12)
+	gui.animate(nd("toggle_track"), gui.PROP_COLOR,
+		muted and vmath.vector4(0.5,0.15,0.15,1) or vmath.vector4(0.2,0.6,0.2,1),
+		gui.EASING_LINEAR, 0.12)
+	gui.set_text(nd("toggle_label"), muted and "OFF" or "ON")
+	gui.set_color(nd("toggle_label"), muted and vmath.vector4(0.8,0.3,0.3,1) or vmath.vector4(0.2,0.8,0.2,1))
+end
+
+local function update_slider_visuals(self)
+	local fill_w = math.max(1, self.music_volume * TRACK_W)
+	gui.set_size(nd("vol_fill"), vmath.vector3(fill_w, 8, 0))
+	gui.set_position(nd("vol_handle"), vmath.vector3(TRACK_LEFT + self.music_volume * TRACK_W, 325, 0))
+	gui.set_text(nd("vol_pct"), math.floor(self.music_volume * 100 + 0.5) .. "%")
+end
+
+local function apply_volume(self, v)
+	self.music_volume = math.max(0, math.min(1, v))
+	local gain = self.music_muted and 0 or self.music_volume
+	msg.post("/start_screen#music", "set_gain", { gain = gain })
+	update_slider_visuals(self)
+	settings.save({ music_volume = self.music_volume, music_muted = self.music_muted })
+end
+
+local function open_settings(self)
+	self.prev_state = self.state
+	self.state = STATE_SETTINGS
+	self.dragging_vol = false
+	show_all(SETTINGS_NODES)
+	gui.set_alpha(nd("settings_dim"), 0.6)
+	update_slider_visuals(self)
+	update_toggle_visuals(self)
+end
+
+local function close_settings(self)
+	hide_all(SETTINGS_NODES)
+	self.state = self.prev_state or STATE_MENU
+	self.dragging_vol = false
+end
+
 -- ─── SHOW SPLASH ──────────────────────────────────────────────────────────────
 
 local function show_splash(self)
@@ -55,8 +101,10 @@ local function show_splash(self)
 
 	hide_all(MENU_NODES)
 	hide_all(CONTROLS_NODES)
+	hide_all(SETTINGS_NODES)
+	gui.set_enabled(nd("btn_settings"), false)
+	gui.set_alpha(nd("btn_settings"), 0)
 
-	-- show splash nodes immediately at full alpha
 	for _, id in ipairs(SPLASH_NODES) do
 		gui.set_enabled(nd(id), true)
 		gui.set_alpha(nd(id), 1)
@@ -71,7 +119,7 @@ local function go_to_menu(self)
 	if self.transitioning then return end
 	self.transitioning = true
 	self.fade_t = 0
-	self.fade_phase = 1  -- fade to black, then show menu, then fade back in (phase 2)
+	self.fade_phase = 1
 end
 
 -- ─── CONTROLS ─────────────────────────────────────────────────────────────────
@@ -95,7 +143,7 @@ local function launch_level(self, level)
 	if self.transitioning then return end
 	self.transitioning = true
 	self.fade_t = 0
-	self.fade_phase = 4  -- fade to black then load level
+	self.fade_phase = 4
 	self.pending_level = level
 end
 
@@ -106,50 +154,53 @@ function init(self)
 	self.state = STATE_SPLASH
 	self.transitioning = false
 	self.fade_t = 0
-	self.fade_dir = 0
 	self.fade_phase = 0
 	self.pending_level = 0
 	self.blink_t = 0
 	self.blink_on = true
+	self.dragging_vol = false
+	self.prev_state = STATE_MENU
+
+	local s = settings.load()
+	self.music_volume = s.music_volume
+	self.music_muted  = s.music_muted
 
 	wavedash.update_load_progress(1)
 	wavedash.init()
 
-	msg.post("/start_screen#music", "play_sound", { delay = 0, gain = 0.7 })
 	show_splash(self)
 end
 
 function update(self, dt)
-	-- prompt blink
 	if self.state == STATE_SPLASH then
 		self.blink_t = self.blink_t + dt
-		if self.blink_t >= 0.6 then
+		if self.blink_t >= 0.5 then
 			self.blink_t = 0
 			self.blink_on = not self.blink_on
-			gui.set_alpha(nd("splash_prompt"), self.blink_on and 1 or 0.2)
+			gui.set_enabled(nd("splash_prompt"), self.blink_on)
 		end
 	end
 
-	-- fade transition
 	if not self.transitioning then return end
 
 	local FADE_SPEED = 3.0
 	self.fade_t = self.fade_t + dt * FADE_SPEED
 
 	if self.fade_phase == 1 or self.fade_phase == 4 then
-		-- fading TO black
 		local a = math.min(self.fade_t, 1)
 		gui.set_alpha(nd("fade_overlay"), a)
 		if a >= 1 then
 			if self.fade_phase == 1 then
-				-- splash → menu
 				hide_all(SPLASH_NODES)
 				show_all(MENU_NODES)
+				gui.set_enabled(nd("btn_settings"), true)
+				gui.set_alpha(nd("btn_settings"), 1)
 				self.state = STATE_MENU
 				self.fade_t = 0
 				self.fade_phase = 2
+				local gain = self.music_muted and 0 or self.music_volume
+				msg.post("/start_screen#music", "play_sound", { delay = 0, gain = gain })
 			else
-				-- launch level
 				self.transitioning = false
 				self.fade_phase = 0
 				msg.post("/start_screen#music", "stop_sound")
@@ -158,7 +209,6 @@ function update(self, dt)
 		end
 
 	elseif self.fade_phase == 2 then
-		-- fading FROM black (menu appearing)
 		local b = math.max(1 - self.fade_t, 0)
 		gui.set_alpha(nd("fade_overlay"), b)
 		if b <= 0 then
@@ -170,9 +220,49 @@ function update(self, dt)
 end
 
 function on_input(self, action_id, action)
+	if not self.transitioning and action_id == hash("click") and action.released then
+		if pick("btn_settings", action.x, action.y) then
+			if self.state == STATE_SETTINGS then
+				close_settings(self)
+			else
+				open_settings(self)
+			end
+			return
+		end
+	end
+
 	if self.state == STATE_SPLASH then
 		if action_id == hash("key_space") and action.released then
 			go_to_menu(self)
+		end
+		return
+	end
+
+	if self.state == STATE_SETTINGS then
+		if action_id == hash("click") then
+			if action.pressed then
+				if pick("vol_track", action.x, action.y) or pick("vol_handle", action.x, action.y) then
+					self.dragging_vol = true
+					apply_volume(self, (action.x - TRACK_LEFT) / TRACK_W)
+				end
+			elseif action.released then
+				self.dragging_vol = false
+				if pick("toggle_track", action.x, action.y) or pick("toggle_knob", action.x, action.y) then
+					self.music_muted = not self.music_muted
+					local gain = self.music_muted and 0 or self.music_volume
+					msg.post("/start_screen#music", "set_gain", { gain = gain })
+					update_toggle_visuals(self)
+					settings.save({ music_volume = self.music_volume, music_muted = self.music_muted })
+				elseif not pick("settings_panel", action.x, action.y) then
+					close_settings(self)
+				end
+			end
+		elseif not action_id and self.dragging_vol then
+			apply_volume(self, (action.x - TRACK_LEFT) / TRACK_W)
+		end
+
+		if action_id == hash("key_escape") and action.released then
+			close_settings(self)
 		end
 		return
 	end
@@ -230,10 +320,14 @@ function on_message(self, message_id, message, sender)
 		hide_all(SPLASH_NODES)
 		hide_all(MENU_NODES)
 		hide_all(CONTROLS_NODES)
+		hide_all(SETTINGS_NODES)
+		gui.set_enabled(nd("btn_settings"), false)
 		gui.set_alpha(nd("fade_overlay"), 0)
 		gui.set_enabled(nd("fade_overlay"), false)
 		msg.post(".", "release_input_focus")
 	elseif message_id == hash("show_start_screen") then
+		gui.set_enabled(nd("btn_settings"), true)
+		gui.set_alpha(nd("btn_settings"), 1)
 		show_splash(self)
 		msg.post(".", "acquire_input_focus")
 	end

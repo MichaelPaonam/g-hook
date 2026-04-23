@@ -1,6 +1,6 @@
 images {
   image: "/assets/images/cover.png"
 }
-margin: 0
-extrude_borders: 0
-inner_padding: 0
+images {
+  image: "/splash.png"
+}

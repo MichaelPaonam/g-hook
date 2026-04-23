@@ -297,6 +297,10 @@ end
 
 function on_input(self, action_id, action)
 	if self.reset_timer > 0 then return end  -- block all input during reset countdown
+	if action_id == hash("restart") and action.released then
+		restart(self)
+		return
+	end
 	if action_id == hash("move_up") then
 		if action.pressed then self.input.y = 1
 		elseif action.released then self.input.y = 0 end
