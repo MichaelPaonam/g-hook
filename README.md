@@ -11,7 +11,7 @@ Fire cables at anchor points and walls, get pulled toward them, chain hooks for 
 | **Q** | Fire grappling hook toward cursor |
 | **E** | Release all cables |
 | **WASD** | Move (weak steering force; retains momentum after cable release) |
-| **Right-click drag** | Pan camera |
+| **Middle-mouse drag** | Pan camera |
 | **Scroll wheel** | Zoom in / out |
 
 ## How It Works
