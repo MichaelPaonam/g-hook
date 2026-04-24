@@ -8,21 +8,18 @@ local function reposition(node_id, x, y)
 end
 
 local function show(self)
-	gui.set_enabled(gui.get_node("title"), true)
 	gui.set_enabled(gui.get_node("next_btn"), true)
 	gui.set_enabled(gui.get_node("next_label"), true)
 	msg.post(".", "acquire_input_focus")
 end
 
 local function hide(self)
-	gui.set_enabled(gui.get_node("title"), false)
 	gui.set_enabled(gui.get_node("next_btn"), false)
 	gui.set_enabled(gui.get_node("next_label"), false)
 	msg.post(".", "release_input_focus")
 end
 
 function init(self)
-	reposition("title",      480, 400)
 	reposition("next_btn",   480, 280)
 	reposition("next_label", 480, 280)
 	hide(self)

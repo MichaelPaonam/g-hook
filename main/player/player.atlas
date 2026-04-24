@@ -1,7 +1,7 @@
 animations {
   id: "idle"
   images {
-    image: "/assets/images/player.png"
+    image: "/assets/images/spider.png"
   }
   playback: PLAYBACK_NONE
   fps: 1

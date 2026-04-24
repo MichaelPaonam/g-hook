@@ -8,57 +8,926 @@ fonts {
   font: "/main/passion.font"
 }
 textures {
-  name: "button"
-  texture: "/main/button.atlas"
+  name: "gear"
+  texture: "/assets/images/gear.atlas"
+}
+textures {
+  name: "cover"
+  texture: "/assets/images/cover.atlas"
+}
+textures {
+  name: "start_menu_bg"
+  texture: "/assets/images/start_menu_bg.atlas"
+}
+textures {
+  name: "menu_panel"
+  texture: "/assets/images/menu_panel.atlas"
 }
 nodes {
   position {
     x: 480.0
-    y: 400.0
+    y: 320.0
+  }
+  size {
+    x: 960.0
+    y: 640.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  type: TYPE_BOX
+  id: "fade_overlay"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 960.0
+    y: 640.0
+  }
+  type: TYPE_BOX
+  texture: "cover/splash"
+  id: "splash_bg"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 175.0
+  }
+  size {
+    x: 700.0
+    y: 100.0
+  }
+  color {
+    y: 0.55
+    z: 0.05
+  }
+  type: TYPE_TEXT
+  text: "."
+  font: "passion"
+  id: "splash_title"
+  outline {
+    x: 0.8
+    y: 0.3
+  }
+  inherit_alpha: true
+  alpha: 0.0
+  outline_alpha: 0.5
+}
+nodes {
+  position {
+    x: 480.0
+    y: 32.0
+  }
+  size {
+    x: 400.0
+    y: 22.0
+  }
+  color {
+    x: 0.9490196
+    y: 0.9490196
+    z: 0.9490196
+  }
+  type: TYPE_TEXT
+  text: "PRESS SPACEBAR TO START"
+  font: "passion"
+  id: "splash_prompt"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 960.0
+    y: 640.0
+  }
+  type: TYPE_BOX
+  texture: "start_menu_bg/start_menu_bg"
+  id: "menu_bg"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 744.0
+    y: 320.0
+  }
+  size {
+    x: 432.0
+    y: 640.0
+  }
+  type: TYPE_BOX
+  texture: "menu_panel/menu_panel"
+  id: "menu_panel"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 744.0
+    y: 436.0
+  }
+  size {
+    x: 376.0
+    y: 72.0
+  }
+  color {
+    x: 0.14
+    y: 0.09
+    z: 0.03
+  }
+  type: TYPE_BOX
+  id: "btn_play"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 552.0
+    y: 436.0
+  }
+  size {
+    x: 4.0
+    y: 72.0
+  }
+  color {
+    y: 0.5
+    z: 0.1
+  }
+  type: TYPE_BOX
+  id: "btn_play_accent"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 574.0
+    y: 454.0
+  }
+  size {
+    x: 320.0
+    y: 32.0
+  }
+  color {
+    y: 0.6
+    z: 0.1
+  }
+  type: TYPE_TEXT
+  text: "PLAY"
+  font: "passion"
+  id: "btn_play_label"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 574.0
+    y: 416.0
   }
   size {
     x: 300.0
-    y: 36.0
+    y: 18.0
+  }
+  color {
+    x: 0.45
+    y: 0.45
+    z: 0.45
   }
   type: TYPE_TEXT
-  text: "G-HOOK"
-  font: "passion"
-  id: "title"
+  text: "Start from Level 1"
+  font: "system_font"
+  id: "btn_play_sub"
+  pivot: PIVOT_W
   inherit_alpha: true
+  alpha: 0.0
 }
 nodes {
   position {
-    x: 480.0
-    y: 280.0
+    x: 744.0
+    y: 354.0
   }
   size {
-    x: 200.0
-    y: 100.0
-  }
-  type: TYPE_BOX
-  texture: "button/red"
-  id: "start_btn"
-  inherit_alpha: true
-  slice9 {
-    x: 40.0
-    y: 40.0
-    z: 40.0
-    w: 40.0
-  }
-}
-nodes {
-  position {
-    x: 480.0
-    y: 280.0
-  }
-  size {
-    x: 200.0
+    x: 376.0
     y: 60.0
   }
-  type: TYPE_TEXT
-  text: "START"
-  font: "passion"
-  id: "start_label"
+  color {
+    x: 0.07
+    y: 0.1
+    z: 0.16
+  }
+  type: TYPE_BOX
+  id: "btn_levels"
   inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 552.0
+    y: 354.0
+  }
+  size {
+    x: 4.0
+    y: 60.0
+  }
+  color {
+    x: 0.2
+    y: 0.7
+  }
+  type: TYPE_BOX
+  id: "btn_levels_accent"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 574.0
+    y: 368.0
+  }
+  size {
+    x: 320.0
+    y: 26.0
+  }
+  color {
+    x: 0.2
+    y: 0.7
+  }
+  type: TYPE_TEXT
+  text: "LEVEL SELECT"
+  font: "passion"
+  id: "btn_levels_label"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 574.0
+    y: 336.0
+  }
+  size {
+    x: 300.0
+    y: 18.0
+  }
+  color {
+    x: 0.45
+    y: 0.45
+    z: 0.45
+  }
+  type: TYPE_TEXT
+  text: "Choose a level"
+  font: "system_font"
+  id: "btn_levels_sub"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 744.0
+    y: 278.0
+  }
+  size {
+    x: 376.0
+    y: 60.0
+  }
+  color {
+    x: 0.09
+    y: 0.1
+    z: 0.14
+  }
+  type: TYPE_BOX
+  id: "btn_controls"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 552.0
+    y: 278.0
+  }
+  size {
+    x: 4.0
+    y: 60.0
+  }
+  color {
+    x: 0.6
+    y: 0.6
+    z: 0.65
+  }
+  type: TYPE_BOX
+  id: "btn_controls_accent"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 574.0
+    y: 292.0
+  }
+  size {
+    x: 320.0
+    y: 26.0
+  }
+  color {
+    x: 0.85
+    y: 0.85
+    z: 0.85
+  }
+  type: TYPE_TEXT
+  text: "CONTROLS"
+  font: "passion"
+  id: "btn_controls_label"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 574.0
+    y: 260.0
+  }
+  size {
+    x: 300.0
+    y: 18.0
+  }
+  color {
+    x: 0.45
+    y: 0.45
+    z: 0.45
+  }
+  type: TYPE_TEXT
+  text: "View key bindings"
+  font: "system_font"
+  id: "btn_controls_sub"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 960.0
+    y: 640.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  type: TYPE_BOX
+  id: "controls_dim"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  size {
+    x: 960.0
+    y: 640.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  type: TYPE_BOX
+  id: "level_select_dim"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 400.0
+    y: 340.0
+  }
+  color {
+    x: 0.08
+    y: 0.09
+    z: 0.14
+  }
+  type: TYPE_BOX
+  id: "level_select_panel"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 462.0
+  }
+  size {
+    x: 360.0
+    y: 32.0
+  }
+  color {
+    y: 0.55
+    z: 0.05
+  }
+  type: TYPE_TEXT
+  text: "SELECT LEVEL"
+  font: "passion"
+  id: "level_select_title"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 390.0
+  }
+  size {
+    x: 340.0
+    y: 52.0
+  }
+  color {
+    x: 0.07
+    y: 0.10
+    z: 0.16
+  }
+  type: TYPE_BOX
+  id: "ls_btn_1"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 390.0
+  }
+  size {
+    x: 340.0
+    y: 24.0
+  }
+  color {
+    x: 0.9
+    y: 0.9
+    z: 0.9
+  }
+  type: TYPE_TEXT
+  text: "LEVEL 1"
+  font: "passion"
+  id: "ls_btn_1_label"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 340.0
+    y: 52.0
+  }
+  color {
+    x: 0.07
+    y: 0.10
+    z: 0.16
+  }
+  type: TYPE_BOX
+  id: "ls_btn_2"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 340.0
+    y: 24.0
+  }
+  color {
+    x: 0.9
+    y: 0.9
+    z: 0.9
+  }
+  type: TYPE_TEXT
+  text: "LEVEL 2"
+  font: "passion"
+  id: "ls_btn_2_label"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 250.0
+  }
+  size {
+    x: 340.0
+    y: 52.0
+  }
+  color {
+    x: 0.05
+    y: 0.05
+    z: 0.07
+  }
+  type: TYPE_BOX
+  id: "ls_btn_3"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 250.0
+  }
+  size {
+    x: 340.0
+    y: 24.0
+  }
+  color {
+    x: 0.4
+    y: 0.4
+    z: 0.4
+  }
+  type: TYPE_TEXT
+  text: "LEVEL 3  [LOCKED]"
+  font: "passion"
+  id: "ls_btn_3_label"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 178.0
+  }
+  size {
+    x: 340.0
+    y: 20.0
+  }
+  color {
+    x: 0.4
+    y: 0.4
+    z: 0.4
+  }
+  type: TYPE_TEXT
+  text: "ESC or click outside to close"
+  font: "system_font"
+  id: "level_select_hint"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 520.0
+    y: 400.0
+  }
+  color {
+    x: 0.08
+    y: 0.09
+    z: 0.14
+  }
+  type: TYPE_BOX
+  id: "controls_panel"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 488.0
+  }
+  size {
+    x: 460.0
+    y: 32.0
+  }
+  color {
+    y: 0.55
+    z: 0.05
+  }
+  type: TYPE_TEXT
+  text: "CONTROLS"
+  font: "passion"
+  id: "controls_title"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 260.0
+    y: 440.0
+  }
+  size {
+    x: 440.0
+    y: 200.0
+  }
+  color {
+    x: 0.9
+    y: 0.9
+    z: 0.9
+  }
+  type: TYPE_TEXT
+  text: "Q              Fire hook toward cursor\n"
+  "E              Release all cables\n"
+  "W A S D        Steer (retains momentum)\n"
+  "RIGHT-CLICK    Pan camera\n"
+  "SCROLL         Zoom in / out\n"
+  "\n"
+  "Chain hooks within 3s for +20% speed"
+  font: "system_font"
+  id: "controls_text"
+  pivot: PIVOT_NW
+  line_break: true
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 148.0
+  }
+  size {
+    x: 380.0
+    y: 20.0
+  }
+  color {
+    x: 0.4
+    y: 0.4
+    z: 0.4
+  }
+  type: TYPE_TEXT
+  text: "ESC or click outside to close"
+  font: "system_font"
+  id: "controls_close_hint"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 936.0
+    y: 620.0
+  }
+  size {
+    x: 24.0
+    y: 24.0
+  }
+  type: TYPE_BOX
+  texture: "gear/gear"
+  id: "btn_settings"
+  pivot: PIVOT_E
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 960.0
+    y: 640.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  type: TYPE_BOX
+  id: "settings_dim"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 300.0
+    y: 240.0
+  }
+  color {
+    x: 0.08
+    y: 0.09
+    z: 0.14
+  }
+  type: TYPE_BOX
+  id: "settings_panel"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 393.0
+  }
+  size {
+    x: 260.0
+    y: 28.0
+  }
+  color {
+    y: 0.55
+    z: 0.05
+  }
+  type: TYPE_TEXT
+  text: "SETTINGS"
+  font: "passion"
+  id: "settings_title"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 355.0
+    y: 358.0
+  }
+  size {
+    x: 120.0
+    y: 18.0
+  }
+  color {
+    x: 0.8
+    y: 0.8
+    z: 0.8
+  }
+  type: TYPE_TEXT
+  text: "MUSIC VOL"
+  font: "system_font"
+  id: "vol_label"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 325.0
+  }
+  size {
+    x: 200.0
+    y: 8.0
+  }
+  color {
+    x: 0.25
+    y: 0.25
+    z: 0.3
+  }
+  type: TYPE_BOX
+  id: "vol_track"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 380.0
+    y: 325.0
+  }
+  size {
+    x: 200.0
+    y: 8.0
+  }
+  color {
+    y: 0.5
+    z: 0.1
+  }
+  type: TYPE_BOX
+  id: "vol_fill"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 325.0
+  }
+  size {
+    x: 14.0
+    y: 14.0
+  }
+  color {
+    x: 0.9
+    y: 0.9
+    z: 0.9
+  }
+  type: TYPE_BOX
+  id: "vol_handle"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 588.0
+    y: 325.0
+  }
+  size {
+    x: 50.0
+    y: 18.0
+  }
+  color {
+    x: 0.7
+    y: 0.7
+    z: 0.7
+  }
+  type: TYPE_TEXT
+  text: "70%"
+  font: "system_font"
+  id: "vol_pct"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 432.0
+    y: 291.0
+  }
+  size {
+    x: 46.0
+    y: 22.0
+  }
+  color {
+    x: 0.2
+    y: 0.6
+    z: 0.2
+  }
+  type: TYPE_BOX
+  id: "toggle_track"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 451.0
+    y: 291.0
+  }
+  size {
+    x: 18.0
+    y: 18.0
+  }
+  type: TYPE_BOX
+  id: "toggle_knob"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 486.0
+    y: 291.0
+  }
+  size {
+    x: 60.0
+    y: 18.0
+  }
+  color {
+    x: 0.2
+    y: 0.7
+    z: 0.2
+  }
+  type: TYPE_TEXT
+  text: "ON"
+  font: "system_font"
+  id: "toggle_label"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 260.0
+  }
+  size {
+    x: 260.0
+    y: 18.0
+  }
+  color {
+    x: 0.4
+    y: 0.4
+    z: 0.4
+  }
+  type: TYPE_TEXT
+  text: "ESC to close"
+  font: "system_font"
+  id: "settings_hint"
+  inherit_alpha: true
+  alpha: 0.0
 }
 material: "/builtins/materials/gui.material"

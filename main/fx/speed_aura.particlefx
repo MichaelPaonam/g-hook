@@ -18,7 +18,7 @@ emitters {
   properties {
     key: EMITTER_KEY_SIZE_X
     points {
-      y: 30.0
+      y: 100.0
     }
   }
   properties {
@@ -37,9 +37,9 @@ emitters {
   properties {
     key: EMITTER_KEY_PARTICLE_SIZE
     points {
-      y: 50.0
+      y: 120.0
     }
-    spread: 15.0
+    spread: 30.0
   }
   properties {
     key: EMITTER_KEY_PARTICLE_RED

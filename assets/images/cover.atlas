@@ -1,0 +1,6 @@
+images {
+  image: "/assets/images/cover.png"
+}
+images {
+  image: "/assets/images/splash.png"
+}
