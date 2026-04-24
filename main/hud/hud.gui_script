@@ -5,7 +5,8 @@ local DISPLAY_H = 640
 
 local SETTINGS_NODES = { "settings_dim", "settings_panel", "settings_title",
                          "vol_label", "vol_track", "vol_fill", "vol_handle", "vol_pct",
-                         "toggle_track", "toggle_knob", "toggle_label", "settings_hint" }
+                         "toggle_track", "toggle_knob", "toggle_label", "settings_hint",
+                         "btn_menu", "btn_menu_label" }
 
 local TRACK_W    = 200
 local TRACK_LEFT = 380
@@ -68,6 +69,16 @@ local function open_settings(self)
 		gui.set_alpha(nd(id), 1)
 	end
 	gui.set_alpha(nd("settings_dim"), 0.6)
+	-- hide back-to-menu button entirely when already on start screen
+	if self.in_menu then
+		gui.set_enabled(nd("btn_menu"), false)
+		gui.set_alpha(nd("btn_menu"), 0)
+		gui.set_enabled(nd("btn_menu_label"), false)
+		gui.set_alpha(nd("btn_menu_label"), 0)
+	else
+		gui.set_color(nd("btn_menu"), vmath.vector4(0.07, 0.10, 0.16, 1))
+		gui.set_color(nd("btn_menu_label"), vmath.vector4(0.9, 0.9, 0.9, 1))
+	end
 	update_slider_visuals(self)
 	update_toggle_visuals(self)
 end
@@ -100,6 +111,7 @@ function init(self)
 	self.music_muted  = s.music_muted
 	self.settings_open = false
 	self.dragging_vol  = false
+	self.in_menu       = false  -- hud only runs inside a level
 
 	hide_settings(self)
 
@@ -118,6 +130,15 @@ function on_input(self, action_id, action)
 		if self.settings_open and self.dragging_vol then
 			apply_volume(self, (action.x - TRACK_LEFT) / TRACK_W)
 		end
+		if self.settings_open and not self.in_menu then
+			local hovered = gui.pick_node(nd("btn_menu"), action.x, action.y)
+			gui.animate(nd("btn_menu"), gui.PROP_COLOR,
+				hovered and vmath.vector4(0.13,0.19,0.30,1) or vmath.vector4(0.07,0.10,0.16,1),
+				gui.EASING_LINEAR, 0.1)
+			gui.animate(nd("btn_menu_label"), gui.PROP_COLOR,
+				hovered and vmath.vector4(1,1,1,1) or vmath.vector4(0.9,0.9,0.9,1),
+				gui.EASING_LINEAR, 0.1)
+		end
 		return
 	end
 
@@ -127,6 +148,16 @@ function on_input(self, action_id, action)
 			if self.settings_open then hide_settings(self) else open_settings(self) end
 			return
 		end
+	end
+
+	-- ESC opens settings if closed, closes if open
+	if action_id == hash("key_escape") and action.released then
+		if self.settings_open then
+			hide_settings(self)
+		else
+			open_settings(self)
+		end
+		return
 	end
 
 	if not self.settings_open then return end
@@ -145,12 +176,13 @@ function on_input(self, action_id, action)
 				msg.post("/music#music", "set_gain", { gain = gain })
 				update_toggle_visuals(self)
 				settings.save({ music_volume = self.music_volume, music_muted = self.music_muted })
+			elseif pick("btn_menu", action.x, action.y) and not self.in_menu then
+				hide_settings(self)
+				msg.post("main:/loader#loader", "unload_level")
 			elseif not pick("settings_panel", action.x, action.y) then
 				hide_settings(self)
 			end
 		end
-	elseif action_id == hash("key_escape") and action.released then
-		hide_settings(self)
 	end
 end
 
@@ -223,6 +255,9 @@ function on_message(self, message_id, message, sender)
 				end
 			end)
 		end
+
+	elseif message_id == hash("set_in_menu") then
+		self.in_menu = message.value
 
 	elseif message_id == hash("reset") then
 		gui.set_text(self.timer_node, "00:00.000")

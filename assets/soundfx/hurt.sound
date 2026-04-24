@@ -1,0 +1,4 @@
+sound: "/assets/soundfx/SFX_Hurt02.ogg"
+looping: 0
+group: "sfx"
+gain: 0.8

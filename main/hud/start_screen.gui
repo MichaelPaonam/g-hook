@@ -397,6 +397,201 @@ nodes {
   alpha: 0.0
 }
 nodes {
+  size {
+    x: 960.0
+    y: 640.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  type: TYPE_BOX
+  id: "level_select_dim"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 400.0
+    y: 340.0
+  }
+  color {
+    x: 0.08
+    y: 0.09
+    z: 0.14
+  }
+  type: TYPE_BOX
+  id: "level_select_panel"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 462.0
+  }
+  size {
+    x: 360.0
+    y: 32.0
+  }
+  color {
+    y: 0.55
+    z: 0.05
+  }
+  type: TYPE_TEXT
+  text: "SELECT LEVEL"
+  font: "passion"
+  id: "level_select_title"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 390.0
+  }
+  size {
+    x: 340.0
+    y: 52.0
+  }
+  color {
+    x: 0.07
+    y: 0.10
+    z: 0.16
+  }
+  type: TYPE_BOX
+  id: "ls_btn_1"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 390.0
+  }
+  size {
+    x: 340.0
+    y: 24.0
+  }
+  color {
+    x: 0.9
+    y: 0.9
+    z: 0.9
+  }
+  type: TYPE_TEXT
+  text: "LEVEL 1"
+  font: "passion"
+  id: "ls_btn_1_label"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 340.0
+    y: 52.0
+  }
+  color {
+    x: 0.07
+    y: 0.10
+    z: 0.16
+  }
+  type: TYPE_BOX
+  id: "ls_btn_2"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 340.0
+    y: 24.0
+  }
+  color {
+    x: 0.9
+    y: 0.9
+    z: 0.9
+  }
+  type: TYPE_TEXT
+  text: "LEVEL 2"
+  font: "passion"
+  id: "ls_btn_2_label"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 250.0
+  }
+  size {
+    x: 340.0
+    y: 52.0
+  }
+  color {
+    x: 0.05
+    y: 0.05
+    z: 0.07
+  }
+  type: TYPE_BOX
+  id: "ls_btn_3"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 250.0
+  }
+  size {
+    x: 340.0
+    y: 24.0
+  }
+  color {
+    x: 0.4
+    y: 0.4
+    z: 0.4
+  }
+  type: TYPE_TEXT
+  text: "LEVEL 3  [LOCKED]"
+  font: "passion"
+  id: "ls_btn_3_label"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 178.0
+  }
+  size {
+    x: 340.0
+    y: 20.0
+  }
+  color {
+    x: 0.4
+    y: 0.4
+    z: 0.4
+  }
+  type: TYPE_TEXT
+  text: "ESC or click outside to close"
+  font: "system_font"
+  id: "level_select_hint"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
   position {
     x: 480.0
     y: 320.0
@@ -526,7 +721,7 @@ nodes {
   }
   size {
     x: 300.0
-    y: 180.0
+    y: 240.0
   }
   color {
     x: 0.08
