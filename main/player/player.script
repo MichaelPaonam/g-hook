@@ -280,6 +280,7 @@ local function fire_hook(self)
 		})
 	}
 	table.insert(self.cables, cable)
+	msg.post("#sfx_shoot", "play_sound", { gain = 1.0 })
 
 	self.state = STATE_HOOKED
 	go.set("#collisionobject", "linear_damping", DAMPING_HOOKED)
@@ -297,6 +298,10 @@ end
 
 function on_input(self, action_id, action)
 	if self.reset_timer > 0 then return end  -- block all input during reset countdown
+	if action_id == hash("restart") and action.released then
+		restart(self)
+		return
+	end
 	if action_id == hash("move_up") then
 		if action.pressed then self.input.y = 1
 		elseif action.released then self.input.y = 0 end
@@ -362,6 +367,7 @@ function on_message(self, message_id, message, sender)
 			go.set("#collisionobject", "linear_velocity", vmath.normalize(away) * 600)
 			msg.post(message.checkpoint_url, "reset")
 			msg.post("/hud#hud", "show_message", { text = "TOO SLOW! Need speed 700+" })
+			msg.post("#sfx_hurt", "play_sound", { gain = 1.0 })
 		end
 	elseif message_id == hash("checkpoint_hit") then
 		self.checkpoints_hit = (self.checkpoints_hit or 0) + 1
@@ -371,9 +377,11 @@ function on_message(self, message_id, message, sender)
 			self.timer_running = false
 			local final_time = self.elapsed_time
 			msg.post("/hud#hud", "finish", { time = final_time })
+			msg.post("#sfx_coin", "play_sound", { gain = 1.0 })
 		end
 	elseif message_id == hash("wrong_checkpoint") then
 		msg.post("/hud#hud", "show_message", { text = "WRONG ORDER! RESETTING..." })
+		msg.post("#sfx_hurt", "play_sound", { gain = 1.0 })
 		self.reset_timer = 1.5
 	elseif message_id == hash("contact_point_response") then
 		-- wall collision handled by physics engine

@@ -11,6 +11,10 @@ textures {
   name: "player"
   texture: "/main/player/player.atlas"
 }
+textures {
+  name: "gear"
+  texture: "/assets/images/gear.atlas"
+}
 nodes {
   position {
     x: 480.0
@@ -96,8 +100,8 @@ nodes {
 }
 nodes {
   position {
-    x: 940.0
-    y: 620.0
+    x: 20.0
+    y: 572.0
   }
   size {
     x: 200.0
@@ -110,13 +114,13 @@ nodes {
   type: TYPE_TEXT
   font: "system_font"
   id: "chain"
-  pivot: PIVOT_E
+  pivot: PIVOT_W
   inherit_alpha: true
 }
 nodes {
   position {
-    x: 940.0
-    y: 596.0
+    x: 20.0
+    y: 548.0
   }
   size {
     x: 200.0
@@ -129,7 +133,7 @@ nodes {
   type: TYPE_TEXT
   font: "system_font"
   id: "level_label"
-  pivot: PIVOT_E
+  pivot: PIVOT_W
   inherit_alpha: true
 }
 nodes {
@@ -164,5 +168,305 @@ nodes {
   id: "cursor"
   inherit_alpha: true
   pivot: PIVOT_CENTER
+}
+nodes {
+  position {
+    x: 956.0
+    y: 620.0
+  }
+  size {
+    x: 20.0
+    y: 20.0
+  }
+  color {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  type: TYPE_BOX
+  texture: "gear/gear"
+  id: "btn_settings"
+  pivot: PIVOT_E
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 960.0
+    y: 640.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  type: TYPE_BOX
+  id: "settings_dim"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  size {
+    x: 300.0
+    y: 240.0
+  }
+  color {
+    x: 0.08
+    y: 0.09
+    z: 0.14
+  }
+  type: TYPE_BOX
+  id: "settings_panel"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 393.0
+  }
+  size {
+    x: 260.0
+    y: 28.0
+  }
+  color {
+    y: 0.55
+    z: 0.05
+  }
+  type: TYPE_TEXT
+  text: "SETTINGS"
+  font: "passion"
+  id: "settings_title"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 355.0
+    y: 358.0
+  }
+  size {
+    x: 120.0
+    y: 18.0
+  }
+  color {
+    x: 0.8
+    y: 0.8
+    z: 0.8
+  }
+  type: TYPE_TEXT
+  text: "MUSIC VOL"
+  font: "system_font"
+  id: "vol_label"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 325.0
+  }
+  size {
+    x: 200.0
+    y: 8.0
+  }
+  color {
+    x: 0.25
+    y: 0.25
+    z: 0.3
+  }
+  type: TYPE_BOX
+  id: "vol_track"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 380.0
+    y: 325.0
+  }
+  size {
+    x: 200.0
+    y: 8.0
+  }
+  color {
+    y: 0.5
+    z: 0.1
+  }
+  type: TYPE_BOX
+  id: "vol_fill"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 325.0
+  }
+  size {
+    x: 14.0
+    y: 14.0
+  }
+  color {
+    x: 0.9
+    y: 0.9
+    z: 0.9
+  }
+  type: TYPE_BOX
+  id: "vol_handle"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 588.0
+    y: 325.0
+  }
+  size {
+    x: 50.0
+    y: 18.0
+  }
+  color {
+    x: 0.7
+    y: 0.7
+    z: 0.7
+  }
+  type: TYPE_TEXT
+  text: "70%"
+  font: "system_font"
+  id: "vol_pct"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 432.0
+    y: 291.0
+  }
+  size {
+    x: 46.0
+    y: 22.0
+  }
+  color {
+    x: 0.2
+    y: 0.6
+    z: 0.2
+  }
+  type: TYPE_BOX
+  id: "toggle_track"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 451.0
+    y: 291.0
+  }
+  size {
+    x: 18.0
+    y: 18.0
+  }
+  color {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  type: TYPE_BOX
+  id: "toggle_knob"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 486.0
+    y: 291.0
+  }
+  size {
+    x: 60.0
+    y: 18.0
+  }
+  color {
+    x: 0.2
+    y: 0.7
+    z: 0.2
+  }
+  type: TYPE_TEXT
+  text: "ON"
+  font: "system_font"
+  id: "toggle_label"
+  pivot: PIVOT_W
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 260.0
+  }
+  size {
+    x: 260.0
+    y: 18.0
+  }
+  color {
+    x: 0.4
+    y: 0.4
+    z: 0.4
+  }
+  type: TYPE_TEXT
+  text: "ESC to close"
+  font: "system_font"
+  id: "settings_hint"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 222.0
+  }
+  size {
+    x: 260.0
+    y: 36.0
+  }
+  color {
+    x: 0.07
+    y: 0.10
+    z: 0.16
+  }
+  type: TYPE_BOX
+  id: "btn_menu"
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: 480.0
+    y: 222.0
+  }
+  size {
+    x: 260.0
+    y: 22.0
+  }
+  color {
+    x: 0.9
+    y: 0.9
+    z: 0.9
+  }
+  type: TYPE_TEXT
+  text: "BACK TO MENU"
+  font: "passion"
+  id: "btn_menu_label"
+  inherit_alpha: true
+  alpha: 0.0
 }
 material: "/builtins/materials/gui.material"
