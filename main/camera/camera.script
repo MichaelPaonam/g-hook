@@ -1,3 +1,9 @@
+local CAMERA_ZOOM = 1.6
+local DISPLAY_W   = tonumber(sys.get_config("display.width"))  or 960
+local DISPLAY_H   = tonumber(sys.get_config("display.height")) or 640
+local HALF_W      = (DISPLAY_W / 2) / CAMERA_ZOOM
+local HALF_H      = (DISPLAY_H / 2) / CAMERA_ZOOM
+
 go.property("target", msg.url())
 go.property("lerp_speed", 5.0)
 go.property("lead_factor", 0.15)
@@ -7,14 +13,14 @@ function init(self)
 	self.pan_offset = vmath.vector3(0, 0, 0)
 	self.panning = false
 	self.pan_return_speed = 3.0
-	-- snap to target immediately on first frame
+	self.world_min = vmath.vector3(-math.huge, -math.huge, 0)
+	self.world_max = vmath.vector3( math.huge,  math.huge, 0)
 	local target_pos = go.get_position(self.target)
 	go.set_position(vmath.vector3(target_pos.x, target_pos.y, 0))
 	msg.post("@render:", "set_camera_pos", { pos = go.get_position() })
 end
 
 function update(self, dt)
-	-- when not panning, smoothly return pan_offset to zero
 	if not self.panning then
 		self.pan_offset = vmath.lerp(math.min(self.pan_return_speed * dt, 1.0), self.pan_offset, vmath.vector3(0, 0, 0))
 	end
@@ -24,6 +30,10 @@ function update(self, dt)
 	desired = desired + self.offset + self.pan_offset
 	local current = go.get_position()
 	local new_pos = vmath.lerp(math.min(self.lerp_speed * dt, 1.0), current, desired)
+
+	new_pos.x = math.max(self.world_min.x + HALF_W, math.min(self.world_max.x - HALF_W, new_pos.x))
+	new_pos.y = math.max(self.world_min.y + HALF_H, math.min(self.world_max.y - HALF_H, new_pos.y))
+
 	go.set_position(new_pos)
 	msg.post("@render:", "set_camera_pos", { pos = new_pos })
 end
@@ -31,6 +41,9 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == hash("set_lead") then
 		self.offset = message.offset or vmath.vector3(0, 0, 0)
+	elseif message_id == hash("set_world_bounds") then
+		self.world_min = vmath.vector3(message.min_x, message.min_y, 0)
+		self.world_max = vmath.vector3(message.max_x, message.max_y, 0)
 	elseif message_id == hash("pan_delta") then
 		self.pan_offset = self.pan_offset + message.delta
 	elseif message_id == hash("pan_start") then

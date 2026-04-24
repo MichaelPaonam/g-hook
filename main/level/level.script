@@ -92,6 +92,14 @@ function init(self)
 	self.finished = false
 
 	msg.post("/hud#hud", "update_level", { index = self.level_index })
+
+	local WORLD_BOUNDS = {
+		[1] = { min_x=0, min_y=0, max_x=928,  max_y=640  },
+		[2] = { min_x=0, min_y=0, max_x=880,  max_y=1552 },
+		[3] = { min_x=0, min_y=0, max_x=3840, max_y=1280 },
+	}
+	local b = WORLD_BOUNDS[self.level_index]
+	if b then msg.post("/camera#camera_script", "set_world_bounds", b) end
 	local s = settings.load()
 	local gain = s.music_muted and 0 or s.music_volume
 	msg.post("/music#music", "play_sound", { delay = 0, gain = gain })

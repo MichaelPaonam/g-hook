@@ -341,7 +341,7 @@ function on_input(self, action_id, action)
 		if self.panning then
 			local dx = action.x - self.last_pan_pos.x
 			local dy = action.y - self.last_pan_pos.y
-			local zoom = 0.5
+			local zoom = 1.6
 			msg.post("/camera#camera_script", "pan_delta", {
 				delta = vmath.vector3(-dx / zoom, -dy / zoom, 0)
 			})

@@ -1,6 +1,6 @@
 local DISPLAY_WIDTH = tonumber(sys.get_config("display.width")) or 960
 local DISPLAY_HEIGHT = tonumber(sys.get_config("display.height")) or 640
-local CAMERA_ZOOM = 0.5 -- <1 = zoomed out, shows more of the world
+local CAMERA_ZOOM = 1.6 -- >1 = zoomed in, shows less of the world
 
 local function fit_viewport(window_w, window_h)
 	local scale = math.min(window_w / DISPLAY_WIDTH, window_h / DISPLAY_HEIGHT)
