@@ -75,8 +75,8 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: 150.0
-    y: 150.0
+    x: 100.0
+    y: 180.0
   }
 }
 embedded_instances {
@@ -102,8 +102,8 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: 150.0
-    y: 150.0
+    x: 100.0
+    y: 180.0
   }
 }
 embedded_instances {
@@ -111,6 +111,11 @@ embedded_instances {
   data: "components {\n"
   "  id: \"level_script\"\n"
   "  component: \"/main/level/level.script\"\n"
+  "  properties {\n"
+  "    id: \"level_index\"\n"
+  "    value: \"3.0\"\n"
+  "    type: PROPERTY_TYPE_NUMBER\n"
+  "  }\n"
   "}\n"
   "components {\n"
   "  id: \"wall_factory\"\n"
@@ -141,4 +146,167 @@ embedded_instances {
   "  component: \"/main/hud/level_complete.gui\"\n"
   "}\n"
   ""
+}
+embedded_instances {
+  id: "tilemap"
+  data: "components {\n"
+  "  id: \"level3\"\n"
+  "  component: \"/levels/level_3/level3.tilemap\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collisionobject\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"collision_shape: \\\"/levels/level_3/level3.tilemap\\\"\\n"
+  "type: COLLISION_OBJECT_TYPE_STATIC\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"wall\\\"\\n"
+  "mask: \\\"player\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "anchor1"
+  data: "components {\n"
+  "  id: \"level2_anchor\"\n"
+  "  component: \"/levels/level_2/level2_anchor.tilemap\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collisionobject\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"collision_shape: \\\"/levels/level_2/level2_anchor.tilemap\\\"\\n"
+  "type: COLLISION_OBJECT_TYPE_STATIC\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"anchor\\\"\\n"
+  "mask: \\\"player\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 960.0
+    y: 480.0
+  }
+}
+embedded_instances {
+  id: "anchor3"
+  data: "components {\n"
+  "  id: \"level2_anchor\"\n"
+  "  component: \"/levels/level_2/level2_anchor.tilemap\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collisionobject\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"collision_shape: \\\"/levels/level_2/level2_anchor.tilemap\\\"\\n"
+  "type: COLLISION_OBJECT_TYPE_STATIC\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"anchor\\\"\\n"
+  "mask: \\\"player\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 1872.0
+    y: 640.0
+  }
+}
+embedded_instances {
+  id: "anchor4"
+  data: "components {\n"
+  "  id: \"level2_anchor\"\n"
+  "  component: \"/levels/level_2/level2_anchor.tilemap\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collisionobject\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"collision_shape: \\\"/levels/level_2/level2_anchor.tilemap\\\"\\n"
+  "type: COLLISION_OBJECT_TYPE_STATIC\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"anchor\\\"\\n"
+  "mask: \\\"player\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 2720.0
+    y: 640.0
+  }
+}
+embedded_instances {
+  id: "anchor5"
+  data: "components {\n"
+  "  id: \"level2_anchor\"\n"
+  "  component: \"/levels/level_2/level2_anchor.tilemap\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collisionobject\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"collision_shape: \\\"/levels/level_2/level2_anchor.tilemap\\\"\\n"
+  "type: COLLISION_OBJECT_TYPE_STATIC\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"anchor\\\"\\n"
+  "mask: \\\"player\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 3200.0
+    y: 640.0
+  }
+}
+embedded_instances {
+  id: "checkpoint"
+  data: "components {\n"
+  "  id: \"checkpoint\"\n"
+  "  component: \"/main/level/checkpoint.script\"\n"
+  "  properties {\n"
+  "    id: \"is_level_end\"\n"
+  "    value: \"true\"\n"
+  "    type: PROPERTY_TYPE_BOOLEAN\n"
+  "  }\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collisionobject\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"type: COLLISION_OBJECT_TYPE_TRIGGER\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"checkpoint\\\"\\n"
+  "mask: \\\"player\\\"\\n"
+  "embedded_collision_shape {\\n"
+  "  shapes {\\n"
+  "    shape_type: TYPE_BOX\\n"
+  "    position {\\n"
+  "      y: 42.0\\n"
+  "    }\\n"
+  "    rotation {\\n"
+  "    }\\n"
+  "    index: 0\\n"
+  "    count: 3\\n"
+  "  }\\n"
+  "  data: 10.0\\n"
+  "  data: 63.95592\\n"
+  "  data: 10.0\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 3600.0
+    y: 400.0
+  }
+  scale3 {
+    x: 3.131143
+    y: 3.241566
+  }
 }

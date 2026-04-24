@@ -147,6 +147,7 @@ end
 local LS_BUTTONS = {
 	{ id = "ls_btn_1", label = "ls_btn_1_label", level = 1 },
 	{ id = "ls_btn_2", label = "ls_btn_2_label", level = 2 },
+	{ id = "ls_btn_3", label = "ls_btn_3_label", level = 3 },
 }
 
 local function open_level_select(self)

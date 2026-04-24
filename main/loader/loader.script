@@ -22,14 +22,12 @@ function on_message(self, message_id, message, sender)
 		msg.post(proxy, "unload")
 		self.current_level = 0
 		msg.post("/start_screen#start_screen_gui", "show_menu")
-		msg.post("/hud#hud", "set_in_menu", { value = true })
 
 	elseif message_id == hash("proxy_loaded") then
 		msg.post(sender, "init")
 		msg.post(sender, "enable")
 		msg.post(sender, "acquire_input_focus")
 		msg.post("/start_screen#start_screen_gui", "hide_start_screen")
-		msg.post("/hud#hud", "set_in_menu", { value = false })
 	end
 end
 
