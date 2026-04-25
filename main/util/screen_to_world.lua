@@ -1,6 +1,6 @@
 local M = {}
 
-local ZOOM = 1.6  -- must match render/game.render_script zoom value
+local ZOOM = 1.0  -- must match render/game.render_script zoom value
 
 function M.screen_to_world(screen_x, screen_y, camera_id)
 	local camera_pos = go.get_position(camera_id)

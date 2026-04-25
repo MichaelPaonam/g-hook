@@ -1,5 +1,5 @@
 name: "level_1"
-scale_along_z: 0
+scale_along_z: 1
 embedded_instances {
   id: "player"
   data: "components {\n"
@@ -166,6 +166,10 @@ embedded_instances {
   "\"\n"
   "}\n"
   ""
+  scale3 {
+    x: 0.5
+    y: 0.5
+  }
 }
 embedded_instances {
   id: "checkpoint"
@@ -208,5 +212,28 @@ embedded_instances {
   position {
     x: 945.0
     y: 214.0
+  }
+}
+embedded_instances {
+  id: "background"
+  data: "embedded_components {\n"
+  "  id: \"background\"\n"
+  "  type: \"sprite\"\n"
+  "  data: \"default_animation: \\\"bg_image_level_1\\\"\\n"
+  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
+  "textures {\\n"
+  "  sampler: \\\"texture_sampler\\\"\\n"
+  "  texture: \\\"/levels/level_1/level1_bg.atlas\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 459.0
+    y: 317.0
+  }
+  scale3 {
+    x: 0.6
+    y: 0.6
   }
 }

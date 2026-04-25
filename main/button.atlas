@@ -19,4 +19,18 @@ animations {
   }
   playback: PLAYBACK_NONE
 }
+animations {
+  id: "retry"
+  images {
+    image: "/assets/images/retry.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+}
+animations {
+  id: "next"
+  images {
+    image: "/assets/images/next_level.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+}
 extrude_borders: 2

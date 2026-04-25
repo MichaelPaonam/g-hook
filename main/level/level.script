@@ -104,20 +104,7 @@ function init(self)
 	local gain = s.music_muted and 0 or s.music_volume
 	msg.post("/music#music", "play_sound", { delay = 0, gain = gain })
 
-	if self.level_index == 1 then
-		timer.delay(0.5, false, function()
-			msg.post("/hud#hud", "show_message", { text = "AIM with MOUSE   Q to HOOK" })
-			timer.delay(3.0, false, function()
-				msg.post("/hud#hud", "show_message", { text = "E to RELEASE   WASD to steer" })
-				timer.delay(3.0, false, function()
-					msg.post("/hud#hud", "show_message", { text = "Chain hooks for SPEED BONUS!" })
-					timer.delay(3.0, false, function()
-						msg.post("/hud#hud", "show_message", { text = "" })
-					end)
-				end)
-			end)
-		end)
-	elseif self.level_index == 2 then
+	if self.level_index == 2 then
 		timer.delay(0.5, false, function()
 			msg.post("/hud#hud", "show_message", { text = "Reach SPEED 700 to pass the gate!" })
 			timer.delay(3.5, false, function()

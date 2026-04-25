@@ -1,4 +1,4 @@
-local CAMERA_ZOOM = 1.6
+local CAMERA_ZOOM = 1.0
 local DISPLAY_W   = tonumber(sys.get_config("display.width"))  or 960
 local DISPLAY_H   = tonumber(sys.get_config("display.height")) or 640
 local HALF_W      = (DISPLAY_W / 2) / CAMERA_ZOOM

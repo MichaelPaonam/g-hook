@@ -17,15 +17,15 @@ textures {
 }
 nodes {
   position {
-    x: 480.0
-    y: 280.0
+    x: 575.0
+    y: 261.0
   }
-  size {
-    x: 200.0
-    y: 100.0
+  scale {
+    x: 0.125
+    y: 0.125
   }
   type: TYPE_BOX
-  texture: "button/green"
+  texture: "button/next"
   id: "next_btn"
   inherit_alpha: true
   slice9 {
@@ -34,20 +34,27 @@ nodes {
     z: 40.0
     w: 40.0
   }
+  size_mode: SIZE_MODE_AUTO
 }
 nodes {
   position {
-    x: 480.0
-    y: 280.0
+    x: 365.0
+    y: 261.0
   }
-  size {
-    x: 240.0
-    y: 60.0
+  scale {
+    x: 0.125
+    y: 0.125
   }
-  type: TYPE_TEXT
-  text: "Go to Level 2"
-  font: "passion"
-  id: "next_label"
+  type: TYPE_BOX
+  texture: "button/retry"
+  id: "restart_btn"
   inherit_alpha: true
+  slice9 {
+    x: 40.0
+    y: 40.0
+    z: 40.0
+    w: 40.0
+  }
+  size_mode: SIZE_MODE_AUTO
 }
 material: "/builtins/materials/gui.material"
