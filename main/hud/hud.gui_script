@@ -125,7 +125,6 @@ function format_time(t)
 end
 
 function on_input(self, action_id, action)
-	if action_id then print("[HUD INPUT]", action_id, "pressed:", action.pressed, "released:", action.released) end
 	if not action_id then
 		gui.set_position(self.cursor_node, vmath.vector3(action.x, action.y, 0))
 		if self.settings_open and self.dragging_vol then

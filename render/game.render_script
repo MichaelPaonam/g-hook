@@ -58,22 +58,9 @@ function update(self)
 		-1, 1)
 	render.set_projection(proj)
 
-	-- use a wider frustum for sprites to prevent culling of scaled cable sprites
-	-- whose origin (midpoint) may be off-screen while the visual still crosses the viewport
-	local cull_pad = 2000
-	local no_cull_proj = vmath.matrix4_orthographic(
-		-DISPLAY_WIDTH / (2 * CAMERA_ZOOM) - cull_pad, DISPLAY_WIDTH / (2 * CAMERA_ZOOM) + cull_pad,
-		-DISPLAY_HEIGHT / (2 * CAMERA_ZOOM) - cull_pad, DISPLAY_HEIGHT / (2 * CAMERA_ZOOM) + cull_pad,
-		-1, 1)
-	local view = vmath.matrix4_look_at(
-		vmath.vector3(cx, cy, 1),
-		vmath.vector3(cx, cy, 0),
-		vmath.vector3(0, 1, 0))
-	local no_cull_frustum = no_cull_proj * view
-
 	render.draw(self.bg_pred)
 	render.draw(self.tile_pred)
-	render.draw(self.sprite_pred, { frustum = no_cull_frustum })
+	render.draw(self.sprite_pred)
 	render.draw(self.particle_pred)
 	render.draw_debug3d()
 

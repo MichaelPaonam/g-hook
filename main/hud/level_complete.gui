@@ -38,7 +38,7 @@ nodes {
 }
 nodes {
   position {
-    x: 365.0
+    x: 375.0
     y: 261.0
   }
   scale {

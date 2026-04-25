@@ -32,7 +32,6 @@ function on_message(self, message_id, message, sender)
 		msg.post("/start_screen#start_screen_gui", "show_menu")
 
 	elseif message_id == hash("proxy_loaded") then
-		print("[LOADER] proxy_loaded from", sender, "- granting input focus")
 		msg.post(sender, "init")
 		msg.post(sender, "enable")
 		msg.post(sender, "acquire_input_focus")

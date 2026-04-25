@@ -229,16 +229,14 @@ local function fire_hook(self)
 	local target = stw.screen_to_world(self.mouse_screen.x, self.mouse_screen.y, "/camera")
 	local dir = target - player_pos
 	local dist = vmath.length(dir)
-	print("[FIRE] player:", player_pos, "target:", target, "dist:", dist, "mouse:", self.mouse_screen)
 
-	if dist < 1 then print("[FIRE] abort: dist < 1") return end
+	if dist < 1 then return end
 	if dist > HOOK_MAX_RANGE then
 		target = player_pos + vmath.normalize(dir) * HOOK_MAX_RANGE
 		dist = HOOK_MAX_RANGE
 	end
 
 	local result = physics.raycast(player_pos, target, { hash("wall"), hash("anchor") })
-	print("[FIRE] raycast result:", result)
 	if not result then return end
 
 	if not self.timer_running then
@@ -298,7 +296,6 @@ local function release_all(self)
 end
 
 function on_input(self, action_id, action)
-	print("[INPUT]", action_id, "pressed:", action.pressed, "released:", action.released)
 	if self.reset_timer > 0 then return end  -- block all input during reset countdown
 	if action_id == hash("restart") and action.released then
 		restart(self)
@@ -318,7 +315,6 @@ function on_input(self, action_id, action)
 		elseif action.released then self.input.x = 0 end
 	elseif action_id == hash("fire_hook") then
 		if action.pressed then
-			print("[INPUT] fire_hook pressed — calling fire_hook()")
 			fire_hook(self)
 		end
 	elseif action_id == hash("release_hooks") then

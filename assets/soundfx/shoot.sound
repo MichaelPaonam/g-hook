@@ -1,4 +1,3 @@
-sound: "/assets/soundfx/SFX_Shoot01.ogg"
-looping: 0
+sound: "/assets/soundfx/SFX_Hurt02.ogg"
 group: "sfx"
 gain: 0.8
