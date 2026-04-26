@@ -155,6 +155,9 @@ function on_message(self, message_id, message, sender)
 		self.timer_running = false
 		msg.post("/player#player", "finish_hit")
 		msg.post("/level_complete#level_complete_gui", "show_level_complete", { next_level = self.level_index + 1 })
+		if self.level_index == 3 then
+			msg.post("/drill#drill_script", "freeze")
+		end
 
 	elseif message_id == hash("finish_triggered") then
 		if self.all_checkpoints_hit then

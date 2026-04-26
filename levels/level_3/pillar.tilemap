@@ -1,0 +1,51 @@
+tile_set: "/levels/level_1/level1_1.tilesource"
+layers {
+  id: "layer1"
+  z: 0.0
+  cell {
+    x: 0
+    y: 0
+    tile: 69
+  }
+  cell {
+    x: 0
+    y: 1
+    tile: 60
+  }
+  cell {
+    x: 0
+    y: 2
+    tile: 60
+  }
+  cell {
+    x: 0
+    y: 3
+    tile: 60
+  }
+  cell {
+    x: 0
+    y: 4
+    tile: 60
+  }
+  cell {
+    x: 0
+    y: 5
+    tile: 60
+  }
+  cell {
+    x: 0
+    y: 6
+    tile: 60
+  }
+  cell {
+    x: 0
+    y: 7
+    tile: 60
+  }
+  cell {
+    x: 0
+    y: 8
+    tile: 60
+  }
+}
+material: "/builtins/materials/tile_map.material"

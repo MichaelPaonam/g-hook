@@ -51,6 +51,7 @@ function init(self)
 	self.total_checkpoints = 0
 	self.reset_timer = 0
 	self.frozen = false
+	self.dead = false
 	self.aura_playing = false
 	particlefx.stop("#speed_aura")
 end
@@ -62,6 +63,7 @@ local function restart(self)
 	self.elapsed_time = 0
 	self.last_release_time = 0
 	self.reset_timer = 0
+	self.dead = false
 	self.aura_playing = false
 	particlefx.stop("#speed_aura")
 	self.state = STATE_FREE
@@ -403,6 +405,8 @@ function on_message(self, message_id, message, sender)
 		msg.post("#sfx_hurt", "play_sound", { gain = 1.0 })
 		self.reset_timer = 1.5
 	elseif message_id == hash("kill") then
+		if self.dead then return end
+		self.dead = true
 		print("[PLAYER] kill received from:", sender, "— player_pos:", go.get_position())
 		msg.post("#sfx_hurt", "play_sound", { gain = 1.0 })
 		msg.post("/game_over#game_over_gui", "show_game_over")

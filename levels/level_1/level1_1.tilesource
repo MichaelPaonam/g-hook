@@ -305,7 +305,7 @@ convex_hulls {
 convex_hulls {
   index: 240
   count: 4
-  collision_group: ""
+  collision_group: "wall"
 }
 convex_hulls {
   index: 244
@@ -350,7 +350,7 @@ convex_hulls {
 convex_hulls {
   index: 276
   count: 4
-  collision_group: ""
+  collision_group: "wall"
 }
 convex_hulls {
   index: 280

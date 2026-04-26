@@ -5,6 +5,7 @@ local function show(self)
 	gui.set_enabled(gui.get_node("menu_btn"),  true)
 	msg.post(".", "acquire_input_focus")
 	msg.post("/player#player", "freeze")
+	msg.post("/drill#drill_script", "freeze")
 end
 
 local function hide(self)

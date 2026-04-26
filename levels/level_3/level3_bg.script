@@ -1,0 +1,23 @@
+-- 1536px image × 0.625 scale = 960px rendered width (fills screen exactly)
+local TILE_W   = 960
+local CENTER_Y = 320
+
+function init(self)
+	self.tile1 = msg.url("/bg1")
+	self.tile2 = msg.url("/bg2")
+end
+
+function update(self, dt)
+	local cam_x = go.get_position("/camera").x
+
+	for _, tile in ipairs({ self.tile1, self.tile2 }) do
+		local x = go.get_position(tile).x
+		-- recycle when the tile's right edge has passed the camera's left edge
+		if x + TILE_W * 0.5 < cam_x - TILE_W * 0.5 then
+			local x1 = go.get_position(self.tile1).x
+			local x2 = go.get_position(self.tile2).x
+			local rightmost = math.max(x1, x2)
+			go.set_position(vmath.vector3(rightmost + TILE_W, CENTER_Y, 0), tile)
+		end
+	end
+end
