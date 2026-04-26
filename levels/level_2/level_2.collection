@@ -143,30 +143,6 @@ embedded_instances {
   ""
 }
 embedded_instances {
-  id: "side_wall"
-  data: "components {\n"
-  "  id: \"level2\"\n"
-  "  component: \"/levels/level_2/level2.tilemap\"\n"
-  "}\n"
-  "embedded_components {\n"
-  "  id: \"collisionobject\"\n"
-  "  type: \"collisionobject\"\n"
-  "  data: \"collision_shape: \\\"/levels/level_2/level2.tilemap\\\"\\n"
-  "type: COLLISION_OBJECT_TYPE_STATIC\\n"
-  "mass: 0.0\\n"
-  "friction: 0.1\\n"
-  "restitution: 0.5\\n"
-  "group: \\\"wall\\\"\\n"
-  "mask: \\\"player\\\"\\n"
-  "\"\n"
-  "}\n"
-  ""
-  scale3 {
-    x: 0.492
-    y: 0.492
-  }
-}
-embedded_instances {
   id: "level_complete"
   data: "components {\n"
   "  id: \"level_complete_gui\"\n"
@@ -228,29 +204,6 @@ embedded_instances {
   }
 }
 embedded_instances {
-  id: "background"
-  data: "embedded_components {\n"
-  "  id: \"background\"\n"
-  "  type: \"sprite\"\n"
-  "  data: \"default_animation: \\\"bg_image\\\"\\n"
-  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "textures {\\n"
-  "  sampler: \\\"texture_sampler\\\"\\n"
-  "  texture: \\\"/levels/level_2/level2_bg.atlas\\\"\\n"
-  "}\\n"
-  "\"\n"
-  "}\n"
-  ""
-  position {
-    x: 468.0
-    y: 777.0
-  }
-  rotation {
-    z: 0.70710677
-    w: 0.70710677
-  }
-}
-embedded_instances {
   id: "checkpoint1"
   data: "components {\n"
   "  id: \"checkpoint\"\n"
@@ -304,154 +257,6 @@ embedded_instances {
   }
 }
 embedded_instances {
-  id: "meta_obstacle_2"
-  data: "components {\n"
-  "  id: \"level2_anchor\"\n"
-  "  component: \"/levels/level_2/level2_anchor.tilemap\"\n"
-  "}\n"
-  "embedded_components {\n"
-  "  id: \"anchor\"\n"
-  "  type: \"collisionobject\"\n"
-  "  data: \"collision_shape: \\\"/levels/level_2/level2_anchor.tilemap\\\"\\n"
-  "type: COLLISION_OBJECT_TYPE_STATIC\\n"
-  "mass: 0.0\\n"
-  "friction: 0.1\\n"
-  "restitution: 0.5\\n"
-  "group: \\\"anchor\\\"\\n"
-  "mask: \\\"player\\\"\\n"
-  "\"\n"
-  "}\n"
-  ""
-  position {
-    x: 206.0
-    y: 507.0
-  }
-}
-embedded_instances {
-  id: "metal_obstacle"
-  data: "components {\n"
-  "  id: \"level2_anchor\"\n"
-  "  component: \"/levels/level_2/level2_anchor.tilemap\"\n"
-  "}\n"
-  "embedded_components {\n"
-  "  id: \"anchor\"\n"
-  "  type: \"collisionobject\"\n"
-  "  data: \"collision_shape: \\\"/levels/level_2/level2_anchor.tilemap\\\"\\n"
-  "type: COLLISION_OBJECT_TYPE_STATIC\\n"
-  "mass: 0.0\\n"
-  "friction: 0.1\\n"
-  "restitution: 0.5\\n"
-  "group: \\\"anchor\\\"\\n"
-  "mask: \\\"player\\\"\\n"
-  "\"\n"
-  "}\n"
-  ""
-  position {
-    x: 639.0
-    y: 507.0
-  }
-}
-embedded_instances {
-  id: "crate2"
-  data: "embedded_components {\n"
-  "  id: \"crate\"\n"
-  "  type: \"sprite\"\n"
-  "  data: \"default_animation: \\\"crate2\\\"\\n"
-  "material: \\\"/assets/materials/sprite.material\\\"\\n"
-  "textures {\\n"
-  "  sampler: \\\"texture_sampler\\\"\\n"
-  "  texture: \\\"/assets/images/crates.atlas\\\"\\n"
-  "}\\n"
-  "\"\n"
-  "}\n"
-  "embedded_components {\n"
-  "  id: \"crate_co\"\n"
-  "  type: \"collisionobject\"\n"
-  "  data: \"type: COLLISION_OBJECT_TYPE_STATIC\\n"
-  "mass: 0.0\\n"
-  "friction: 0.1\\n"
-  "restitution: 0.5\\n"
-  "group: \\\"anchor\\\"\\n"
-  "mask: \\\"player\\\"\\n"
-  "embedded_collision_shape {\\n"
-  "  shapes {\\n"
-  "    shape_type: TYPE_BOX\\n"
-  "    position {\\n"
-  "    }\\n"
-  "    rotation {\\n"
-  "    }\\n"
-  "    index: 0\\n"
-  "    count: 3\\n"
-  "  }\\n"
-  "  data: 76.85636\\n"
-  "  data: 71.53071\\n"
-  "  data: 10.0\\n"
-  "}\\n"
-  "\"\n"
-  "}\n"
-  ""
-  position {
-    x: 315.0
-    y: 1434.0
-  }
-  scale3 {
-    x: 0.42095
-    y: 0.460916
-  }
-}
-embedded_instances {
-  id: "crate1"
-  data: "embedded_components {\n"
-  "  id: \"crate\"\n"
-  "  type: \"sprite\"\n"
-  "  data: \"default_animation: \\\"crate2\\\"\\n"
-  "material: \\\"/assets/materials/sprite.material\\\"\\n"
-  "size {\\n"
-  "  x: 157.0\\n"
-  "  y: 132.0\\n"
-  "}\\n"
-  "textures {\\n"
-  "  sampler: \\\"texture_sampler\\\"\\n"
-  "  texture: \\\"/assets/images/crates.atlas\\\"\\n"
-  "}\\n"
-  "\"\n"
-  "}\n"
-  "embedded_components {\n"
-  "  id: \"crate_co\"\n"
-  "  type: \"collisionobject\"\n"
-  "  data: \"type: COLLISION_OBJECT_TYPE_STATIC\\n"
-  "mass: 0.0\\n"
-  "friction: 0.1\\n"
-  "restitution: 0.5\\n"
-  "group: \\\"anchor\\\"\\n"
-  "mask: \\\"player\\\"\\n"
-  "embedded_collision_shape {\\n"
-  "  shapes {\\n"
-  "    shape_type: TYPE_BOX\\n"
-  "    position {\\n"
-  "    }\\n"
-  "    rotation {\\n"
-  "    }\\n"
-  "    index: 0\\n"
-  "    count: 3\\n"
-  "  }\\n"
-  "  data: 76.85636\\n"
-  "  data: 71.53071\\n"
-  "  data: 10.0\\n"
-  "}\\n"
-  "\"\n"
-  "}\n"
-  ""
-  position {
-    x: 631.0
-    y: 1434.0
-  }
-  scale3 {
-    x: 0.42095
-    y: 0.460916
-  }
-}
-embedded_instances {
   id: "base"
   data: "components {\n"
   "  id: \"level2_base\"\n"
@@ -474,4 +279,28 @@ embedded_instances {
     x: 0.5
     y: 0.5
   }
+}
+embedded_instances {
+  id: "corridor"
+  data: "components {\n"
+  "  id: \"corridor\"\n"
+  "  component: \"/levels/level_2/corridor.script\"\n"
+  "}\n"
+  "components {\n"
+  "  id: \"wall_factory\"\n"
+  "  component: \"/levels/level_2/wall_tile.factory\"\n"
+  "}\n"
+  "components {\n"
+  "  id: \"obstacle_factory\"\n"
+  "  component: \"/levels/level_2/obstacle.factory\"\n"
+  "}\n"
+  "components {\n"
+  "  id: \"crate_factory\"\n"
+  "  component: \"/levels/level_2/crate_spawn.factory\"\n"
+  "}\n"
+  "components {\n"
+  "  id: \"bg_factory\"\n"
+  "  component: \"/levels/level_2/bg_visual.factory\"\n"
+  "}\n"
+  ""
 }

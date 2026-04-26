@@ -70,7 +70,7 @@ function update(self)
 	render.draw(self.bg_pred)
 	render.draw(self.tile_pred)
 	render.draw(self.cable_pred, { frustum = cable_frustum })
-	render.draw(self.sprite_pred)
+	render.draw(self.sprite_pred, { frustum = cable_frustum })
 	render.draw(self.particle_pred)
 	render.draw_debug3d()
 

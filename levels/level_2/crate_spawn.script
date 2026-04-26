@@ -1,0 +1,6 @@
+go.property("variant", 1)
+
+function init(self)
+	local anim = hash("crate" .. tostring(self.variant))
+	sprite.play_flipbook("#sprite", anim)
+end

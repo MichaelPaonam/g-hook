@@ -38,3 +38,6 @@ default_texture_mag_filter = nearest
 [tilemap]
 max_tile_count = 8192
 
+[sprite]
+max_count = 1024
+

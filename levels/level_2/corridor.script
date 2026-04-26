@@ -1,0 +1,93 @@
+local CORRIDOR_W         = 880
+local CORRIDOR_CENTER_X  = CORRIDOR_W * 0.5
+local TILE_SIZE          = 64   -- wall_visual.go scaled 2x = 64 world units
+local SPAWN_AHEAD        = 700
+local DESPAWN_BELOW      = 700
+
+local BG_TILE_H          = 587  -- bg_image.png 1024px * 0.573 scale ≈ 587 world units
+
+local WALL_LEFT_X        = 32
+local WALL_RIGHT_X       = CORRIDOR_W - 32
+local OBS_INTERVAL_MIN   = 280
+local OBS_INTERVAL_MAX   = 500
+local CRATE_INTERVAL_MIN = 180
+local CRATE_INTERVAL_MAX = 350
+local OBS_MARGIN         = 120
+
+local function cull(list, min_y)
+	for i = #list, 1, -1 do
+		local entry = list[i]
+		if entry.y < min_y then
+			if entry.id then go.delete(entry.id) end
+			table.remove(list, i)
+		end
+	end
+end
+
+function init(self)
+	math.randomseed(os.time())
+	self.panels_l      = {}
+	self.panels_r      = {}
+	self.backgrounds   = {}
+	self.obstacles     = {}
+	self.crates        = {}
+	self.top_y         = 0
+	self.bg_top_y      = 0
+	self.next_obs_y    = 350
+	self.next_crate_y  = 200
+end
+
+function update(self, dt)
+	local cam_y     = go.get_position("/camera").y
+	local spawn_top = cam_y + SPAWN_AHEAD
+	local cull_bot  = cam_y - DESPAWN_BELOW
+
+	-- background tiles (center of corridor, behind everything)
+	while self.bg_top_y < spawn_top do
+		self.bg_top_y = self.bg_top_y + BG_TILE_H
+		local id = factory.create("#bg_factory",
+		               vmath.vector3(CORRIDOR_CENTER_X, self.bg_top_y, -0.5))
+		if id then table.insert(self.backgrounds, { id = id, y = self.bg_top_y }) end
+	end
+	cull(self.backgrounds, cull_bot)
+
+	-- wall tiles left and right
+	while self.top_y < spawn_top do
+		self.top_y = self.top_y + TILE_SIZE
+		local y  = self.top_y
+		local iL = factory.create("#wall_factory", vmath.vector3(WALL_LEFT_X, y, 0))
+		local iR = factory.create("#wall_factory", vmath.vector3(WALL_RIGHT_X, y, 0))
+		if iL then
+			local url = msg.url(nil, iL, "sprite")
+			local sz = go.get(url, "size")
+			local anim = go.get(url, "animation")
+			print("[wall] size=" .. tostring(sz) .. " anim=" .. tostring(anim))
+			table.insert(self.panels_l, { id = iL, y = y })
+		end
+		if iR then table.insert(self.panels_r, { id = iR, y = y }) end
+	end
+	cull(self.panels_l, cull_bot)
+	cull(self.panels_r, cull_bot)
+
+	-- metal obstacles
+	while self.next_obs_y < spawn_top - 200 do
+		local x  = math.random(OBS_MARGIN, CORRIDOR_W - OBS_MARGIN)
+		local id = factory.create("#obstacle_factory",
+		               vmath.vector3(x, self.next_obs_y, 0))
+		if id then table.insert(self.obstacles, { id = id, y = self.next_obs_y }) end
+		self.next_obs_y = self.next_obs_y + math.random(OBS_INTERVAL_MIN, OBS_INTERVAL_MAX)
+	end
+	cull(self.obstacles, cull_bot)
+
+	-- crates
+	while self.next_crate_y < spawn_top - 200 do
+		local x       = math.random(OBS_MARGIN, CORRIDOR_W - OBS_MARGIN)
+		local variant = math.random(1, 3)
+		local id      = factory.create("#crate_factory",
+		                   vmath.vector3(x, self.next_crate_y, 0),
+		                   nil, { variant = variant })
+		if id then table.insert(self.crates, { id = id, y = self.next_crate_y }) end
+		self.next_crate_y = self.next_crate_y + math.random(CRATE_INTERVAL_MIN, CRATE_INTERVAL_MAX)
+	end
+	cull(self.crates, cull_bot)
+end
