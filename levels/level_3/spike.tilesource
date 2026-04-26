@@ -1,0 +1,32 @@
+image: "/assets/images/16-bit-spike-Sheet.png"
+tile_width: 16
+tile_height: 16
+collision: "/assets/images/16-bit-spike-Sheet.png"
+convex_hulls {
+  index: 0
+  count: 6
+  collision_group: "spikes"
+}
+convex_hulls {
+  index: 6
+  count: 6
+  collision_group: ""
+}
+convex_hulls {
+  index: 12
+  count: 6
+  collision_group: ""
+}
+convex_hulls {
+  index: 18
+  count: 6
+  collision_group: ""
+}
+collision_groups: "spike"
+collision_groups: "spikes"
+animations {
+  id: "anim"
+  start_tile: 1
+  end_tile: 1
+}
+extrude_borders: 2

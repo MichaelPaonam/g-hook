@@ -407,6 +407,8 @@ function on_message(self, message_id, message, sender)
 		msg.post("#sfx_hurt", "play_sound", { gain = 1.0 })
 		msg.post("/game_over#game_over_gui", "show_game_over")
 	elseif message_id == hash("contact_point_response") then
-		-- wall collision handled by physics engine
+		if message.other_group == hash("spikes") then
+			msg.post(".", "kill")
+		end
 	end
 end

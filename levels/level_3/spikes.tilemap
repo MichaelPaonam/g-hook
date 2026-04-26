@@ -1,0 +1,46 @@
+tile_set: "/levels/level_3/spike.tilesource"
+layers {
+  id: "layer1"
+  z: 0.0
+  cell {
+    x: 0
+    y: 0
+    tile: 0
+  }
+  cell {
+    x: 1
+    y: 0
+    tile: 0
+  }
+  cell {
+    x: 2
+    y: 0
+    tile: 0
+  }
+  cell {
+    x: 3
+    y: 0
+    tile: 0
+  }
+  cell {
+    x: 4
+    y: 0
+    tile: 0
+  }
+  cell {
+    x: 5
+    y: 0
+    tile: 0
+  }
+  cell {
+    x: 6
+    y: 0
+    tile: 0
+  }
+  cell {
+    x: 7
+    y: 0
+    tile: 0
+  }
+}
+material: "/builtins/materials/tile_map.material"
