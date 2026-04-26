@@ -1,0 +1,103 @@
+script: "/main/hud/game_over.gui_script"
+fonts {
+  name: "passion"
+  font: "/main/passion.font"
+}
+textures {
+  name: "button"
+  texture: "/main/button.atlas"
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+    z: 0.0
+  }
+  size {
+    x: 960.0
+    y: 640.0
+    z: 1.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 0.75
+  }
+  type: TYPE_BOX
+  id: "dim"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_MANUAL
+}
+nodes {
+  position {
+    x: 480.0
+    y: 420.0
+    z: 0.1
+  }
+  size {
+    x: 200.0
+    y: 60.0
+    z: 1.0
+  }
+  color {
+    x: 1.0
+    y: 0.15
+    z: 0.15
+    w: 1.0
+  }
+  type: TYPE_TEXT
+  text: "GAME OVER"
+  font: "passion"
+  id: "title"
+  inherit_alpha: true
+  line_break: false
+  pivot: PIVOT_CENTER
+  text_leading: 1.0
+  text_tracking: 0.0
+}
+nodes {
+  position {
+    x: 375.0
+    y: 261.0
+    z: 0.1
+  }
+  scale {
+    x: 0.125
+    y: 0.125
+  }
+  type: TYPE_BOX
+  texture: "button/retry"
+  id: "retry_btn"
+  inherit_alpha: true
+  slice9 {
+    x: 40.0
+    y: 40.0
+    z: 40.0
+    w: 40.0
+  }
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 575.0
+    y: 261.0
+    z: 0.1
+  }
+  scale {
+    x: 0.125
+    y: 0.125
+  }
+  type: TYPE_BOX
+  texture: "button/next"
+  id: "menu_btn"
+  inherit_alpha: true
+  slice9 {
+    x: 40.0
+    y: 40.0
+    z: 40.0
+    w: 40.0
+  }
+  size_mode: SIZE_MODE_AUTO
+}
+material: "/builtins/materials/gui.material"

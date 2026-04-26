@@ -1,0 +1,7 @@
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		if message.other_group == hash("player") then
+			msg.post("/player#player", "kill")
+		end
+	end
+end

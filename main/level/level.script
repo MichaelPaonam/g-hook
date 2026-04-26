@@ -96,7 +96,7 @@ function init(self)
 	local WORLD_BOUNDS = {
 		[1] = { min_x=0, min_y=0, max_x=928,  max_y=640  },
 		[2] = { min_x=0, min_y=0, max_x=960,  max_y=math.huge },
-		[3] = { min_x=0, min_y=0, max_x=3840, max_y=1280 },
+		[3] = { min_x=0, min_y=0, max_x=1600, max_y=640 },
 	}
 	local b = WORLD_BOUNDS[self.level_index]
 	if b then msg.post("/camera#camera_script", "set_world_bounds", b) end
@@ -178,6 +178,9 @@ function on_message(self, message_id, message, sender)
 		end
 		if self.finish_url then
 			msg.post(self.finish_url, "reset")
+		end
+		if self.level_index == 3 then
+			msg.post("/drill#drill_script", "reset")
 		end
 	end
 end

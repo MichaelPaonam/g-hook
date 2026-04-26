@@ -1,0 +1,36 @@
+local DRILL_SPEED = 120
+-- local half-extent 111.83 × scale 5.2 = ~581.5 world units; right edge starts at x=-10
+local START_X     = -592
+
+function init(self)
+	local start_pos = vmath.vector3(START_X, 317, 0)
+	go.set_position(start_pos)
+	self.triggered = false
+	self.grace_t = 1.0  -- ignore collisions for first second while collection loads
+	print("[DRILL] init — position set to", start_pos)
+end
+
+function update(self, dt)
+	if self.grace_t > 0 then
+		self.grace_t = self.grace_t - dt
+		return
+	end
+	local pos = go.get_position()
+	go.set_position(vmath.vector3(pos.x + DRILL_SPEED * dt, pos.y, pos.z))
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("trigger_response") then
+		print("[DRILL] trigger_response — other_group:", message.other_group, "enter:", message.enter, "triggered:", self.triggered, "grace_t:", self.grace_t, "drill_pos:", go.get_position())
+		if message.other_group == hash("player") and not self.triggered and self.grace_t <= 0 then
+			self.triggered = true
+			print("[DRILL] sending kill to player")
+			msg.post("/player#player", "kill")
+			timer.delay(0.1, false, function() self.triggered = false end)
+		end
+	elseif message_id == hash("reset") then
+		go.set_position(vmath.vector3(START_X, 317, 0))
+		self.grace_t = 1.0
+		print("[DRILL] reset — position set to", START_X)
+	end
+end
