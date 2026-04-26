@@ -14,6 +14,7 @@ end
 function init(self)
 	self.bg_pred      = render.predicate({"background"})
 	self.tile_pred    = render.predicate({"tile"})
+	self.cable_pred   = render.predicate({"cable"})
 	self.sprite_pred  = render.predicate({"sprite"})
 	self.gui_pred     = render.predicate({"gui"})
 	self.text_pred    = render.predicate({"text"})
@@ -48,18 +49,27 @@ function update(self)
 
 	local cx = self.camera_pos.x
 	local cy = self.camera_pos.y
-	render.set_view(vmath.matrix4_look_at(
+	local view = vmath.matrix4_look_at(
 		vmath.vector3(cx, cy, 1),
 		vmath.vector3(cx, cy, 0),
-		vmath.vector3(0, 1, 0)))
+		vmath.vector3(0, 1, 0))
 	local proj = vmath.matrix4_orthographic(
 		-DISPLAY_WIDTH / (2 * CAMERA_ZOOM), DISPLAY_WIDTH / (2 * CAMERA_ZOOM),
 		-DISPLAY_HEIGHT / (2 * CAMERA_ZOOM), DISPLAY_HEIGHT / (2 * CAMERA_ZOOM),
 		-1, 1)
+	render.set_view(view)
 	render.set_projection(proj)
+
+	-- cable frustum: large padding so scaled cable sprites never get culled mid-swing
+	local pad = 2000
+	local cable_frustum = vmath.matrix4_orthographic(
+		-DISPLAY_WIDTH / (2 * CAMERA_ZOOM) - pad, DISPLAY_WIDTH / (2 * CAMERA_ZOOM) + pad,
+		-DISPLAY_HEIGHT / (2 * CAMERA_ZOOM) - pad, DISPLAY_HEIGHT / (2 * CAMERA_ZOOM) + pad,
+		-1, 1) * view
 
 	render.draw(self.bg_pred)
 	render.draw(self.tile_pred)
+	render.draw(self.cable_pred, { frustum = cable_frustum })
 	render.draw(self.sprite_pred)
 	render.draw(self.particle_pred)
 	render.draw_debug3d()

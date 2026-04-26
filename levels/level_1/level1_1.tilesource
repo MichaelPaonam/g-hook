@@ -20,7 +20,7 @@ convex_hulls {
 convex_hulls {
   index: 12
   count: 4
-  collision_group: ""
+  collision_group: "wall"
 }
 convex_hulls {
   index: 16
@@ -65,7 +65,7 @@ convex_hulls {
 convex_hulls {
   index: 48
   count: 4
-  collision_group: ""
+  collision_group: "wall"
 }
 convex_hulls {
   index: 52
@@ -110,17 +110,17 @@ convex_hulls {
 convex_hulls {
   index: 84
   count: 4
-  collision_group: ""
+  collision_group: "wall"
 }
 convex_hulls {
   index: 88
   count: 4
-  collision_group: ""
+  collision_group: "wall"
 }
 convex_hulls {
   index: 92
   count: 4
-  collision_group: ""
+  collision_group: "wall"
 }
 convex_hulls {
   index: 96

@@ -2,34 +2,22 @@ go.property("anchor_x", 0)
 go.property("anchor_y", 0)
 
 local COLOR = vmath.vector4(0.9, 0.85, 0.5, 1)
-local THICKNESS = 3  -- number of pixels thick (odd number looks best)
+local THICKNESS = 0.75
 
 function init(self)
 	self.anchor_pos = vmath.vector3(self.anchor_x, self.anchor_y, 0)
+	go.set("#sprite", "tint", COLOR)
 end
 
 function update(self, dt)
 	local player_pos = go.get_position("/player")
 	local anchor = self.anchor_pos
+	local midpoint = (anchor + player_pos) * 0.5
+	go.set_position(midpoint)
 
-	-- perpendicular offset for thickness
-	local dx = anchor.x - player_pos.x
-	local dy = anchor.y - player_pos.y
-	local len = math.sqrt(dx * dx + dy * dy)
-	local px, py = 0, 0
-	if len > 0.01 then
-		px = -dy / len
-		py =  dx / len
-	end
-
-	local half = math.floor(THICKNESS / 2)
-	for i = -half, half do
-		local ox = px * i
-		local oy = py * i
-		msg.post("@render:", "draw_line", {
-			start_point = vmath.vector3(player_pos.x + ox, player_pos.y + oy, 0),
-			end_point   = vmath.vector3(anchor.x + ox, anchor.y + oy, 0),
-			color       = COLOR
-		})
-	end
+	local diff = anchor - player_pos
+	local length = vmath.length(diff)
+	local angle = math.atan2(diff.y, diff.x)
+	go.set_rotation(vmath.quat_rotation_z(angle))
+	go.set_scale(vmath.vector3(length / 2, THICKNESS, 1))
 end

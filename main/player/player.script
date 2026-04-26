@@ -34,6 +34,7 @@ end
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
+	self.spawn_pos = go.get_position()
 	self.input = vmath.vector3()
 	self.mouse_screen = vmath.vector3()
 	self.panning = false
@@ -49,6 +50,7 @@ function init(self)
 	self.checkpoints_hit = 0
 	self.total_checkpoints = 0
 	self.reset_timer = 0
+	self.frozen = false
 	self.aura_playing = false
 	particlefx.stop("#speed_aura")
 end
@@ -66,7 +68,7 @@ local function restart(self)
 	self.checkpoints_hit = 0
 	go.set("#collisionobject", "linear_damping", DAMPING_FREE)
 	go.set("#collisionobject", "linear_velocity", vmath.vector3())
-	go.set_position(vmath.vector3(150, 300, 0))
+	go.set_position(self.spawn_pos)
 	msg.post("/hud#hud", "update_timer", { time = 0 })
 	msg.post("/hud#hud", "reset")
 	msg.post("/level#level_script", "reset_checkpoints")
@@ -297,6 +299,7 @@ end
 
 function on_input(self, action_id, action)
 	if self.reset_timer > 0 then return end  -- block all input during reset countdown
+	if self.frozen then return end
 	if action_id == hash("restart") and action.released then
 		restart(self)
 		return
@@ -378,6 +381,11 @@ function on_message(self, message_id, message, sender)
 			msg.post("/hud#hud", "finish", { time = final_time })
 			msg.post("#sfx_coin", "play_sound", { gain = 1.0 })
 		end
+	elseif message_id == hash("freeze") then
+		self.frozen = true
+		go.set("#collisionobject", "linear_velocity", vmath.vector3())
+	elseif message_id == hash("unfreeze") then
+		self.frozen = false
 	elseif message_id == hash("wrong_checkpoint") then
 		msg.post("/hud#hud", "show_message", { text = "WRONG ORDER! RESETTING..." })
 		msg.post("#sfx_hurt", "play_sound", { gain = 1.0 })

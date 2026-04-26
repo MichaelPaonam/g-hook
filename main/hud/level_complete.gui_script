@@ -5,12 +5,14 @@ local function show(self)
 	gui.set_enabled(gui.get_node("next_btn"), true)
 	gui.set_enabled(gui.get_node("restart_btn"), true)
 	msg.post(".", "acquire_input_focus")
+	msg.post("/player#player", "freeze")
 end
 
 local function hide(self)
 	gui.set_enabled(gui.get_node("next_btn"), false)
 	gui.set_enabled(gui.get_node("restart_btn"), false)
 	msg.post(".", "release_input_focus")
+	msg.post("/player#player", "unfreeze")
 end
 
 function init(self)
