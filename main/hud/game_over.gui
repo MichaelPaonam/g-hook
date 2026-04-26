@@ -11,7 +11,6 @@ nodes {
   position {
     x: 480.0
     y: 320.0
-    z: 0.0
   }
   size {
     x: 960.0
@@ -22,12 +21,11 @@ nodes {
     x: 0.0
     y: 0.0
     z: 0.0
-    w: 0.75
   }
   type: TYPE_BOX
   id: "dim"
   inherit_alpha: true
-  size_mode: SIZE_MODE_MANUAL
+  alpha: 0.75
 }
 nodes {
   position {
@@ -35,26 +33,24 @@ nodes {
     y: 420.0
     z: 0.1
   }
+  scale {
+    x: 3.0
+    y: 3.0
+  }
   size {
     x: 200.0
     y: 60.0
     z: 1.0
   }
   color {
-    x: 1.0
     y: 0.15
     z: 0.15
-    w: 1.0
   }
   type: TYPE_TEXT
   text: "GAME OVER"
   font: "passion"
   id: "title"
   inherit_alpha: true
-  line_break: false
-  pivot: PIVOT_CENTER
-  text_leading: 1.0
-  text_tracking: 0.0
 }
 nodes {
   position {

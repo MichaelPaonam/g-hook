@@ -1,0 +1,4 @@
+images {
+  image: "/assets/images/thank_you.png"
+}
+extrude_borders: 2

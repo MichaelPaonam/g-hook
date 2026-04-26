@@ -1,0 +1,49 @@
+script: "/levels/level_3/thanks.gui_script"
+textures {
+  name: "thanks"
+  texture: "/levels/level_3/thanks.atlas"
+}
+textures {
+  name: "button"
+  texture: "/main/button.atlas"
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+    z: 0.0
+  }
+  size {
+    x: 960.0
+    y: 640.0
+    z: 1.0
+  }
+  type: TYPE_BOX
+  texture: "thanks/thank_you"
+  id: "thanks_bg"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_MANUAL
+}
+nodes {
+  position {
+    x: 480.0
+    y: 100.0
+    z: 0.1
+  }
+  scale {
+    x: 0.125
+    y: 0.125
+  }
+  type: TYPE_BOX
+  texture: "button/next"
+  id: "menu_btn"
+  inherit_alpha: true
+  slice9 {
+    x: 40.0
+    y: 40.0
+    z: 40.0
+    w: 40.0
+  }
+  size_mode: SIZE_MODE_AUTO
+}
+material: "/builtins/materials/gui.material"

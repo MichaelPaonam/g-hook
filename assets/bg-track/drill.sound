@@ -1,0 +1,4 @@
+sound: "/assets/bg-track/drill.wav"
+looping: 1
+group: "sfx"
+gain: 1.0

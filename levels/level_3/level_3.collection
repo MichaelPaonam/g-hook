@@ -196,6 +196,14 @@ embedded_instances {
   ""
 }
 embedded_instances {
+  id: "thanks"
+  data: "components {\n"
+  "  id: \"thanks_gui\"\n"
+  "  component: \"/levels/level_3/thanks.gui\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
   id: "game_over"
   data: "components {\n"
   "  id: \"game_over_gui\"\n"
@@ -286,7 +294,7 @@ embedded_instances {
   "    count: 3\\n"
   "  }\\n"
   "  data: 20.0\\n"
-  "  data: 200.0\\n"
+  "  data: 311.53836\\n"
   "  data: 10.0\\n"
   "}\\n"
   "\"\n"

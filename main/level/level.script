@@ -154,9 +154,11 @@ function on_message(self, message_id, message, sender)
 	elseif message_id == hash("level_end_triggered") then
 		self.timer_running = false
 		msg.post("/player#player", "finish_hit")
-		msg.post("/level_complete#level_complete_gui", "show_level_complete", { next_level = self.level_index + 1 })
 		if self.level_index == 3 then
 			msg.post("/drill#drill_script", "freeze")
+			msg.post("/thanks#thanks_gui", "show_thanks")
+		else
+			msg.post("/level_complete#level_complete_gui", "show_level_complete", { next_level = self.level_index + 1 })
 		end
 
 	elseif message_id == hash("finish_triggered") then
