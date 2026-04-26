@@ -1,6 +1,56 @@
 name: "level_2"
 scale_along_z: 0
 embedded_instances {
+  id: "bg1"
+  data: "components {\n"
+  "  id: \"bg_scroll\"\n"
+  "  component: \"/levels/level_2/level2_bg.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"sprite\"\n"
+  "  type: \"sprite\"\n"
+  "  data: \"default_animation: \\\"bg_image\\\"\\n"
+  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
+  "textures {\\n"
+  "  sampler: \\\"texture_sampler\\\"\\n"
+  "  texture: \\\"/levels/level_2/level2_bg_tile.atlas\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 480.0
+    y: 294.0
+  }
+  scale3 {
+    x: 0.573
+    y: 0.573
+  }
+}
+embedded_instances {
+  id: "bg2"
+  data: "embedded_components {\n"
+  "  id: \"sprite\"\n"
+  "  type: \"sprite\"\n"
+  "  data: \"default_animation: \\\"bg_image\\\"\\n"
+  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
+  "textures {\\n"
+  "  sampler: \\\"texture_sampler\\\"\\n"
+  "  texture: \\\"/levels/level_2/level2_bg_tile.atlas\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 480.0
+    y: 881.0
+  }
+  scale3 {
+    x: 0.573
+    y: 0.573
+  }
+}
+embedded_instances {
   id: "player"
   data: "components {\n"
   "  id: \"player\"\n"
@@ -79,7 +129,7 @@ embedded_instances {
   ""
   position {
     x: 482.0
-    y: 37.0
+    y: 16.0
   }
 }
 embedded_instances {

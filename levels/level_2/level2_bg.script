@@ -1,0 +1,22 @@
+local TILE_H   = 587
+local CENTER_X = 480
+
+function init(self)
+	self.tile1 = go.get_id("bg1")
+	self.tile2 = go.get_id("bg2")
+end
+
+function update(self, dt)
+	local cam_y = go.get_position("/camera").y
+
+	for _, tile in ipairs({ self.tile1, self.tile2 }) do
+		local y = go.get_position(tile).y
+		if y < cam_y - TILE_H then
+			-- find the highest tile and place this one above it
+			local y1 = go.get_position(self.tile1).y
+			local y2 = go.get_position(self.tile2).y
+			local top = math.max(y1, y2)
+			go.set_position(vmath.vector3(CENTER_X, top + TILE_H, 0), tile)
+		end
+	end
+end

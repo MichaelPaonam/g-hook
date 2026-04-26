@@ -1,10 +1,7 @@
 local CORRIDOR_W         = 960
-local CORRIDOR_CENTER_X  = CORRIDOR_W * 0.5
-local TILE_SIZE          = 64   -- wall_visual.go scaled 2x = 64 world units
+local TILE_SIZE          = 64
 local SPAWN_AHEAD        = 700
 local DESPAWN_BELOW      = 700
-
-local BG_TILE_H          = 587  -- bg_image.png 1024px * 0.573 scale ≈ 587 world units
 
 local WALL_LEFT_X        = 32
 local WALL_RIGHT_X       = CORRIDOR_W - 32
@@ -28,17 +25,15 @@ function init(self)
 	math.randomseed(os.time())
 	self.panels_l      = {}
 	self.panels_r      = {}
-	self.backgrounds   = {}
 	self.obstacles     = {}
 	self.crates        = {}
 	self.top_y         = -64
-	self.bg_top_y      = 0
 	self.next_obs_y    = 350
 	self.next_crate_y  = 200
 	self.floor_y       = nil
-	-- spawn invisible side barriers once; reposition each frame
-	self.barrier_l = factory.create("#barrier_factory", vmath.vector3(480, 0, 0))
-	self.barrier_r = nil
+	-- spawn barrier below the player's starting position so it doesn't interfere at start
+	local start_cam_y = go.get_position("/camera").y
+	self.barrier = factory.create("#barrier_factory", vmath.vector3(480, start_cam_y - 320, 0))
 end
 
 function update(self, dt)
@@ -46,7 +41,12 @@ function update(self, dt)
 	local spawn_top = cam_y + SPAWN_AHEAD
 	local cull_bot  = cam_y - DESPAWN_BELOW
 
-	-- lock the floor once the player leaves the starting area
+	-- keep floor barrier at camera bottom so player can't swing below
+	if self.barrier then
+		go.set_position(vmath.vector3(480, cam_y - 320, 0), self.barrier)
+	end
+
+	-- raise floor as player climbs so they can't go back down
 	local player_y = go.get_position("/player").y
 	if self.floor_y == nil then
 		self.floor_y = player_y
@@ -57,20 +57,6 @@ function update(self, dt)
 			max_x = 960, max_y = math.huge
 		})
 	end
-
-	-- keep floor barrier at camera bottom edge so player can't swing below
-	if self.barrier_l then
-		go.set_position(vmath.vector3(480, cam_y - 320, 0), self.barrier_l)
-	end
-
-	-- background tiles (center of corridor, behind everything)
-	while self.bg_top_y < spawn_top do
-		self.bg_top_y = self.bg_top_y + BG_TILE_H
-		local id = factory.create("#bg_factory",
-		               vmath.vector3(CORRIDOR_CENTER_X, self.bg_top_y, -0.5))
-		if id then table.insert(self.backgrounds, { id = id, y = self.bg_top_y }) end
-	end
-	cull(self.backgrounds, cull_bot)
 
 	-- wall tiles left and right
 	while self.top_y < spawn_top do
