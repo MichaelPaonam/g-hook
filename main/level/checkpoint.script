@@ -2,6 +2,7 @@ go.property("checkpoint_id", 0)
 go.property("is_finish", false)
 go.property("is_level_end", false)
 go.property("requires_speed", false)
+go.property("notify_corridor", false)
 
 function init(self)
 	self.hit = false
@@ -24,6 +25,9 @@ function on_message(self, message_id, message, sender)
 				self.hit = true
 				if self.is_level_end then
 					msg.post("/level#level_script", "level_end_triggered")
+					if self.notify_corridor then
+						msg.post("/corridor#corridor", "gate_hit")
+					end
 				elseif self.is_finish then
 					msg.post("/level#level_script", "finish_triggered")
 				else

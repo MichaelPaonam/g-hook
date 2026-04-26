@@ -11,6 +11,11 @@ local CRATE_INTERVAL_MIN = 180
 local CRATE_INTERVAL_MAX = 350
 local OBS_MARGIN         = 120
 
+local SPEED_THRESHOLD    = 700
+local SPEED_HOLD_TIME    = 2.0
+local GATE_LIFESPAN      = 10.0
+local GATE_AHEAD         = 300
+
 local function cull(list, min_y)
 	for i = #list, 1, -1 do
 		local entry = list[i]
@@ -34,6 +39,11 @@ function init(self)
 	-- spawn barrier below the player's starting position so it doesn't interfere at start
 	local start_cam_y = go.get_position("/camera").y
 	self.barrier = factory.create("#barrier_factory", vmath.vector3(480, start_cam_y - 320, 0))
+	-- speed gate state
+	self.speed_hold_t  = 0
+	self.gate_id       = nil
+	self.gate_expire_t = 0
+	self.level_complete = false
 end
 
 function update(self, dt)
@@ -56,6 +66,49 @@ function update(self, dt)
 			min_x = 0, min_y = self.floor_y,
 			max_x = 960, max_y = math.huge
 		})
+	end
+
+	-- speed-sustained exit gate
+	local vel   = go.get("/player#collisionobject", "linear_velocity")
+	local speed = vmath.length(vel)
+
+	if self.gate_id == nil then
+		if speed >= SPEED_THRESHOLD then
+			self.speed_hold_t = self.speed_hold_t + dt
+			local pct = math.min(100, math.floor((self.speed_hold_t / SPEED_HOLD_TIME) * 100))
+			msg.post("/hud#hud", "show_message", { text = "SPEED HELD: " .. pct .. "% — keep going!" })
+		else
+			if self.speed_hold_t > 0 then
+				self.speed_hold_t = 0
+				msg.post("/hud#hud", "show_message", { text = "" })
+			end
+		end
+
+		if self.speed_hold_t >= SPEED_HOLD_TIME then
+			self.speed_hold_t = 0
+			local spawn_y = player_y + GATE_AHEAD
+			self.gate_id  = factory.create("#finish_factory", vmath.vector3(480, spawn_y, 0))
+			go.set(msg.url(nil, self.gate_id, "checkpoint"), "notify_corridor", true)
+			self.gate_expire_t = GATE_LIFESPAN
+			msg.post("/hud#hud", "show_message", { text = "EXIT GATE OPEN — 10 seconds!" })
+		end
+	else
+		self.gate_expire_t = self.gate_expire_t - dt
+		local gate_y    = go.get_position(self.gate_id).y
+		local gate_missed = gate_y < cull_bot
+		local gate_expired = self.gate_expire_t <= 0
+		if gate_missed or gate_expired then
+			go.delete(self.gate_id)
+			self.gate_id = nil
+			self.speed_hold_t = 0
+			if not self.level_complete then
+				local msg_text = gate_missed and "Missed the Exit! Try again" or "Gate expired. Reach SPEED 700 again!"
+				msg.post("/hud#hud", "show_message", { text = msg_text })
+				timer.delay(2.5, false, function()
+					msg.post("/hud#hud", "show_message", { text = "" })
+				end)
+			end
+		end
 	end
 
 	-- wall tiles left and right
@@ -91,4 +144,11 @@ function update(self, dt)
 		self.next_crate_y = self.next_crate_y + math.random(CRATE_INTERVAL_MIN, CRATE_INTERVAL_MAX)
 	end
 	cull(self.crates, cull_bot)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("gate_hit") then
+		self.level_complete = true
+		self.gate_id = nil
+	end
 end

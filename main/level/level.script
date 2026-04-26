@@ -106,7 +106,7 @@ function init(self)
 
 	if self.level_index == 2 then
 		timer.delay(0.5, false, function()
-			msg.post("/hud#hud", "show_message", { text = "Reach SPEED 700 to pass the gate!" })
+			msg.post("/hud#hud", "show_message", { text = "Hold SPEED 700 for 2s to open the exit!" })
 			timer.delay(3.5, false, function()
 				msg.post("/hud#hud", "show_message", { text = "" })
 			end)

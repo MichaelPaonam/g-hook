@@ -104,6 +104,11 @@ function init(self)
 
 	gui.set_text(self.message_node, "")
 
+	gui.set_enabled(self.chain_node,       false)
+	gui.set_enabled(self.speed_node,       false)
+	gui.set_enabled(self.cables_node,      false)
+	gui.set_enabled(self.level_label_node, false)
+
 	local s = settings.load()
 	self.level_index  = 0
 	self.best_time    = 0
