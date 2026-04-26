@@ -33,7 +33,7 @@ embedded_components {
   "    count: 3\n"
   "  }\n"
   "  data: 24.0\n"
-  "  data: 24.0\n"
+  "  data: 20.450487\n"
   "  data: 10.0\n"
   "}\n"
   ""

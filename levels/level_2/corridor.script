@@ -57,13 +57,8 @@ function update(self, dt)
 		local y  = self.top_y
 		local iL = factory.create("#wall_factory", vmath.vector3(WALL_LEFT_X, y, 0))
 		local iR = factory.create("#wall_factory", vmath.vector3(WALL_RIGHT_X, y, 0))
-		if iL then
-			local url = msg.url(nil, iL, "sprite")
-			local sz = go.get(url, "size")
-			local anim = go.get(url, "animation")
-			print("[wall] size=" .. tostring(sz) .. " anim=" .. tostring(anim))
-			table.insert(self.panels_l, { id = iL, y = y })
-		end
+		if iL then table.insert(self.panels_l, { id = iL, y = y }) end
+		if iR then table.insert(self.panels_r, { id = iR, y = y }) end
 		if iR then table.insert(self.panels_r, { id = iR, y = y }) end
 	end
 	cull(self.panels_l, cull_bot)
