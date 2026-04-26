@@ -95,7 +95,7 @@ function init(self)
 
 	local WORLD_BOUNDS = {
 		[1] = { min_x=0, min_y=0, max_x=928,  max_y=640  },
-		[2] = { min_x=0, min_y=0, max_x=880,  max_y=math.huge },
+		[2] = { min_x=0, min_y=0, max_x=960,  max_y=math.huge },
 		[3] = { min_x=0, min_y=0, max_x=3840, max_y=1280 },
 	}
 	local b = WORLD_BOUNDS[self.level_index]

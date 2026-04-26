@@ -1,4 +1,4 @@
-local CORRIDOR_W         = 880
+local CORRIDOR_W         = 960
 local CORRIDOR_CENTER_X  = CORRIDOR_W * 0.5
 local TILE_SIZE          = 64   -- wall_visual.go scaled 2x = 64 world units
 local SPAWN_AHEAD        = 700
@@ -31,16 +31,37 @@ function init(self)
 	self.backgrounds   = {}
 	self.obstacles     = {}
 	self.crates        = {}
-	self.top_y         = 0
+	self.top_y         = -64
 	self.bg_top_y      = 0
 	self.next_obs_y    = 350
 	self.next_crate_y  = 200
+	self.floor_y       = nil
+	-- spawn invisible side barriers once; reposition each frame
+	self.barrier_l = factory.create("#barrier_factory", vmath.vector3(480, 0, 0))
+	self.barrier_r = nil
 end
 
 function update(self, dt)
 	local cam_y     = go.get_position("/camera").y
 	local spawn_top = cam_y + SPAWN_AHEAD
 	local cull_bot  = cam_y - DESPAWN_BELOW
+
+	-- lock the floor once the player leaves the starting area
+	local player_y = go.get_position("/player").y
+	if self.floor_y == nil then
+		self.floor_y = player_y
+	elseif player_y > self.floor_y + 100 then
+		self.floor_y = player_y - 100
+		msg.post("/camera#camera_script", "set_world_bounds", {
+			min_x = 0, min_y = self.floor_y,
+			max_x = 960, max_y = math.huge
+		})
+	end
+
+	-- keep floor barrier at camera bottom edge so player can't swing below
+	if self.barrier_l then
+		go.set_position(vmath.vector3(480, cam_y - 320, 0), self.barrier_l)
+	end
 
 	-- background tiles (center of corridor, behind everything)
 	while self.bg_top_y < spawn_top do
@@ -58,7 +79,6 @@ function update(self, dt)
 		local iL = factory.create("#wall_factory", vmath.vector3(WALL_LEFT_X, y, 0))
 		local iR = factory.create("#wall_factory", vmath.vector3(WALL_RIGHT_X, y, 0))
 		if iL then table.insert(self.panels_l, { id = iL, y = y }) end
-		if iR then table.insert(self.panels_r, { id = iR, y = y }) end
 		if iR then table.insert(self.panels_r, { id = iR, y = y }) end
 	end
 	cull(self.panels_l, cull_bot)

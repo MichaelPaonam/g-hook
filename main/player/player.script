@@ -75,6 +75,18 @@ local function restart(self)
 end
 
 function update(self, dt)
+	-- prevent player from going below the camera's bottom edge
+	local cam_y = go.get_position("/camera").y
+	local floor_y = cam_y - 300
+	local pos = go.get_position()
+	if pos.y < floor_y then
+		go.set_position(vmath.vector3(pos.x, floor_y, pos.z))
+		local vel = go.get("#collisionobject", "linear_velocity")
+		if vel.y < 0 then
+			go.set("#collisionobject", "linear_velocity", vmath.vector3(vel.x, 0, vel.z))
+		end
+	end
+
 	-- delayed reset after wrong checkpoint
 	if self.reset_timer > 0 then
 		self.reset_timer = self.reset_timer - dt

@@ -1,17 +1,17 @@
-components {
-  id: "crate_spawn"
-  component: "/levels/level_2/crate_spawn.script"
-}
 embedded_components {
   id: "sprite"
   type: "sprite"
-  data: "default_animation: \"crate1\"\n"
+  data: "default_animation: \"wall\"\n"
   "material: \"/assets/materials/sprite.material\"\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
-  "  texture: \"/assets/images/crates.atlas\"\n"
+  "  texture: \"/main/level/level.atlas\"\n"
   "}\n"
   ""
+  scale {
+    x: 2.0
+    y: 2.0
+  }
 }
 embedded_components {
   id: "collisionobject"
@@ -32,8 +32,8 @@ embedded_components {
   "    index: 0\n"
   "    count: 3\n"
   "  }\n"
-  "  data: 40.0\n"
-  "  data: 40.0\n"
+  "  data: 32.0\n"
+  "  data: 32.0\n"
   "  data: 10.0\n"
   "}\n"
   ""

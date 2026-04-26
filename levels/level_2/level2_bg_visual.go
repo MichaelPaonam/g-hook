@@ -5,7 +5,7 @@ embedded_components {
   "material: \"/builtins/materials/sprite.material\"\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
-  "  texture: \"/levels/level_2/bg_tile.atlas\"\n"
+  "  texture: \"/levels/level_2/level2_bg_tile.atlas\"\n"
   "}\n"
   ""
   scale {
